@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,22 +12,255 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/components/ui/use-toast"
+import { createWell } from "@/app/actions/well-actions"
+import { parseDrillingPhasesCSV, parseBudgetCSV } from "@/lib/utils/csv-parser"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
-import { MapPinIcon, SaveIcon, XIcon, ArrowLeftIcon } from "lucide-react"
+import { MapPinIcon, SaveIcon, XIcon, ArrowLeftIcon, UploadIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
 
 export default function CreateWellPage() {
   const router = useRouter()
+  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
+  const [formState, setFormState] = useState({
+    wellType: "",
+    basin: "",
+    trajectory: "vertical",
+    primaryReservoir: "",
+    contractor: "",
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  // Références pour les inputs de fichier
+  const phasesFileInputRef = useRef<HTMLInputElement>(null)
+  const budgetFileInputRef = useRef<HTMLInputElement>(null)
+
+  // État pour les phases de forage
+  const [drillingPhases, setDrillingPhases] = useState([
+    {
+      number: 1,
+      diameter: "",
+      depth: 0,
+      casing: "",
+      duration: 0,
+    },
+  ])
+
+  // État pour les opérations budgétaires
+  const [budgetOperations, setBudgetOperations] = useState([
+    {
+      operation: "",
+      cost: 0,
+      duration: 0,
+    },
+  ])
+
+  const handleSelectChange = (field: string, value: string) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }))
+  }
+
+  const handleRadioChange = (value: string) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      trajectory: value,
+    }))
+  }
+
+  // Fonction pour ajouter une nouvelle phase de forage
+  const addDrillingPhase = () => {
+    setDrillingPhases((prev) => [
+      ...prev,
+      {
+        number: prev.length + 1,
+        diameter: "",
+        depth: 0,
+        casing: "",
+        duration: 0,
+      },
+    ])
+  }
+
+  // Fonction pour supprimer une phase de forage
+  const removeDrillingPhase = (index: number) => {
+    setDrillingPhases((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // Fonction pour mettre à jour une phase de forage
+  const updateDrillingPhase = (index: number, field: string, value: any) => {
+    setDrillingPhases((prev) => prev.map((phase, i) => (i === index ? { ...phase, [field]: value } : phase)))
+  }
+
+  // Fonction pour ajouter une nouvelle opération budgétaire
+  const addBudgetOperation = () => {
+    setBudgetOperations((prev) => [
+      ...prev,
+      {
+        operation: "",
+        cost: 0,
+        duration: 0,
+      },
+    ])
+  }
+
+  // Fonction pour supprimer une opération budgétaire
+  const removeBudgetOperation = (index: number) => {
+    setBudgetOperations((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // Fonction pour mettre à jour une opération budgétaire
+  const updateBudgetOperation = (index: number, field: string, value: any) => {
+    setBudgetOperations((prev) => prev.map((op, i) => (i === index ? { ...op, [field]: value } : op)))
+  }
+
+  // Fonction pour importer les phases de forage depuis un fichier CSV
+  const handlePhasesImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const result = await parseDrillingPhasesCSV(file)
+
+      if (result.success && result.phases) {
+        setDrillingPhases(result.phases)
+        toast({
+          title: "Import réussi",
+          description: `${result.phases.length} phases importées avec succès.`,
+          variant: "default",
+        })
+      } else {
+        toast({
+          title: "Erreur d'importation",
+          description: result.error || "Erreur lors de l'importation du fichier.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'importation du fichier.",
+        variant: "destructive",
+      })
+    }
+
+    // Réinitialiser l'input file pour permettre de réimporter le même fichier
+    if (phasesFileInputRef.current) {
+      phasesFileInputRef.current.value = ""
+    }
+  }
+
+  // Fonction pour importer les coûts prévisionnels depuis un fichier CSV
+  const handleBudgetImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const result = await parseBudgetCSV(file)
+
+      if (result.success) {
+        // Mettre à jour les champs du formulaire avec les données importées
+        const budgetInput = document.getElementById("budget") as HTMLInputElement
+        const drillingDaysInput = document.getElementById("drilling-days") as HTMLInputElement
+
+        if (budgetInput) budgetInput.value = result.budget.toString()
+        if (drillingDaysInput) drillingDaysInput.value = result.drillingDays.toString()
+
+        // Mettre à jour le tableau des opérations budgétaires
+        setBudgetOperations(result.details)
+
+        toast({
+          title: "Import réussi",
+          description: `Budget et détails des opérations importés avec succès.`,
+          variant: "default",
+        })
+      } else {
+        toast({
+          title: "Erreur d'importation",
+          description: result.error || "Erreur lors de l'importation du fichier.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'importation du fichier.",
+        variant: "destructive",
+      })
+    }
+
+    // Réinitialiser l'input file pour permettre de réimporter le même fichier
+    if (budgetFileInputRef.current) {
+      budgetFileInputRef.current.value = ""
+    }
+  }
+
+  // Calculer le budget total à partir des opérations
+  const calculateTotalBudget = () => {
+    return budgetOperations.reduce((total, op) => total + op.cost, 0)
+  }
+
+  // Calculer la durée totale à partir des opérations
+  const calculateTotalDuration = () => {
+    return budgetOperations.reduce((total, op) => total + op.duration, 0)
+  }
+
+  async function handleSubmit(formData: FormData) {
     setLoading(true)
-    // Simuler la création
-    setTimeout(() => {
-      router.push("/wells")
-    }, 1500)
+
+    try {
+      // Ajouter les phases de forage au formData
+      drillingPhases.forEach((phase, index) => {
+        formData.append(`phase${index + 1}-diameter`, phase.diameter)
+        formData.append(`phase${index + 1}-depth`, phase.depth.toString())
+        formData.append(`phase${index + 1}-casing`, phase.casing)
+        formData.append(`phase${index + 1}-duration`, phase.duration.toString())
+      })
+
+      // Ajouter les opérations budgétaires au formData
+      budgetOperations.forEach((op, index) => {
+        formData.append(`operation${index + 1}-name`, op.operation)
+        formData.append(`operation${index + 1}-cost`, op.cost.toString())
+        formData.append(`operation${index + 1}-duration`, op.duration.toString())
+      })
+
+      // Mettre à jour le budget total et la durée totale si nécessaire
+      if (budgetOperations.length > 0) {
+        formData.set("budget", calculateTotalBudget().toString())
+        formData.set("drilling-days", calculateTotalDuration().toString())
+      }
+
+      const result = await createWell(formData)
+
+      if (result.success) {
+        toast({
+          title: "Succès",
+          description: result.message,
+          variant: "default",
+        })
+
+        // Redirection vers la liste des puits après un court délai
+        setTimeout(() => {
+          router.push("/wells")
+        }, 1000)
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.message,
+          variant: "destructive",
+        })
+        setLoading(false)
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue est survenue",
+        variant: "destructive",
+      })
+      setLoading(false)
+    }
   }
 
   return (
@@ -50,7 +283,7 @@ export default function CreateWellPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form action={handleSubmit}>
             <Tabs defaultValue="basic" className="mb-6">
               <TabsList className="mb-4">
                 <TabsTrigger value="basic">Informations de base</TabsTrigger>
@@ -67,12 +300,17 @@ export default function CreateWellPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="well-name">Nom du puits *</Label>
-                        <Input id="well-name" placeholder="ex: HMD-45" required />
+                        <Input id="well-name" name="well-name" placeholder="ex: HMD-45" required />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="well-type">Type de puits *</Label>
-                        <Select required>
+                        <Select
+                          name="well-type"
+                          value={formState.wellType}
+                          onValueChange={(value) => handleSelectChange("wellType", value)}
+                          required
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Sélectionner un type" />
                           </SelectTrigger>
@@ -92,7 +330,12 @@ export default function CreateWellPage() {
                           <Label htmlFor="basin" className="text-sm text-gray-500">
                             Bassin
                           </Label>
-                          <Select required>
+                          <Select
+                            name="basin"
+                            value={formState.basin}
+                            onValueChange={(value) => handleSelectChange("basin", value)}
+                            required
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -111,14 +354,14 @@ export default function CreateWellPage() {
                           <Label htmlFor="bloc" className="text-sm text-gray-500">
                             Bloc/Périmètre
                           </Label>
-                          <Input id="bloc" placeholder="ex: 405a" />
+                          <Input id="bloc" name="bloc" placeholder="ex: 405a" />
                         </div>
 
                         <div>
                           <Label htmlFor="field" className="text-sm text-gray-500">
                             Champ
                           </Label>
-                          <Input id="field" placeholder="ex: HMD" />
+                          <Input id="field" name="field" placeholder="ex: HMD" />
                         </div>
                       </div>
                     </div>
@@ -130,14 +373,14 @@ export default function CreateWellPage() {
                           <Label htmlFor="latitude" className="text-sm text-gray-500">
                             Latitude (Nord)
                           </Label>
-                          <Input id="latitude" placeholder="ex: 31.6738" required />
+                          <Input id="latitude" name="latitude" placeholder="ex: 31.6738" required />
                         </div>
 
                         <div>
                           <Label htmlFor="longitude" className="text-sm text-gray-500">
                             Longitude (Est)
                           </Label>
-                          <Input id="longitude" placeholder="ex: 5.8898" required />
+                          <Input id="longitude" name="longitude" placeholder="ex: 5.8898" required />
                         </div>
                       </div>
                       <div className="mt-2 flex justify-end">
@@ -152,6 +395,7 @@ export default function CreateWellPage() {
                       <Label htmlFor="description">Description</Label>
                       <Textarea
                         id="description"
+                        name="description"
                         placeholder="Description du puits et de ses objectifs"
                         className="h-24"
                       />
@@ -169,12 +413,17 @@ export default function CreateWellPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="target-depth">Profondeur cible (m) *</Label>
-                        <Input id="target-depth" type="number" placeholder="ex: 3500" required />
+                        <Input id="target-depth" name="target-depth" type="number" placeholder="ex: 3500" required />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="well-trajectory">Trajectoire du puits *</Label>
-                        <RadioGroup defaultValue="vertical">
+                        <RadioGroup
+                          defaultValue="vertical"
+                          value={formState.trajectory}
+                          onValueChange={handleRadioChange}
+                          name="trajectory"
+                        >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="vertical" id="vertical" />
                             <Label htmlFor="vertical">Vertical</Label>
@@ -198,7 +447,12 @@ export default function CreateWellPage() {
                           <Label htmlFor="reservoir1" className="text-sm text-gray-500">
                             Réservoir principal
                           </Label>
-                          <Select required>
+                          <Select
+                            name="reservoir1"
+                            value={formState.primaryReservoir}
+                            onValueChange={(value) => handleSelectChange("primaryReservoir", value)}
+                            required
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -216,7 +470,7 @@ export default function CreateWellPage() {
                           <Label htmlFor="reservoir2" className="text-sm text-gray-500">
                             Réservoir secondaire
                           </Label>
-                          <Select>
+                          <Select name="reservoir2">
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -234,7 +488,7 @@ export default function CreateWellPage() {
                           <Label htmlFor="reservoir3" className="text-sm text-gray-500">
                             Réservoir tertiaire
                           </Label>
-                          <Select>
+                          <Select name="reservoir3">
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -251,7 +505,28 @@ export default function CreateWellPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Programme de forage</Label>
+                      <div className="flex justify-between items-center">
+                        <Label>Programme de forage</Label>
+                        <div className="flex gap-2">
+                          {/* Bouton d'importation pour les phases prévisionnelles */}
+                          <input
+                            type="file"
+                            ref={phasesFileInputRef}
+                            onChange={handlePhasesImport}
+                            accept=".csv"
+                            className="hidden"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            type="button"
+                            onClick={() => phasesFileInputRef.current?.click()}
+                          >
+                            <UploadIcon className="mr-2 h-4 w-4" />
+                            Importer CSV
+                          </Button>
+                        </div>
+                      </div>
                       <div className="border rounded-md">
                         <table className="min-w-full">
                           <thead>
@@ -260,56 +535,91 @@ export default function CreateWellPage() {
                               <th className="py-2 px-4 text-left text-sm font-medium">Diamètre</th>
                               <th className="py-2 px-4 text-left text-sm font-medium">Profondeur (m)</th>
                               <th className="py-2 px-4 text-left text-sm font-medium">Tubage</th>
+                              <th className="py-2 px-4 text-left text-sm font-medium">Durée (jours)</th>
                               <th className="py-2 px-4 text-left text-sm font-medium"></th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr className="border-b">
-                              <td className="py-2 px-4">Phase 1</td>
-                              <td className="py-2 px-4">
-                                <Select>
-                                  <SelectTrigger className="h-8">
-                                    <SelectValue placeholder="Diamètre" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="36">36"</SelectItem>
-                                    <SelectItem value="26">26"</SelectItem>
-                                    <SelectItem value="17.5">17½"</SelectItem>
-                                    <SelectItem value="16">16"</SelectItem>
-                                    <SelectItem value="12.25">12¼"</SelectItem>
-                                    <SelectItem value="8.5">8½"</SelectItem>
-                                    <SelectItem value="6">6"</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </td>
-                              <td className="py-2 px-4">
-                                <Input placeholder="Profondeur" className="h-8" />
-                              </td>
-                              <td className="py-2 px-4">
-                                <Select>
-                                  <SelectTrigger className="h-8">
-                                    <SelectValue placeholder="Type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="30">30"</SelectItem>
-                                    <SelectItem value="20">20"</SelectItem>
-                                    <SelectItem value="13-3-8">13⅜"</SelectItem>
-                                    <SelectItem value="9-5-8">9⅝"</SelectItem>
-                                    <SelectItem value="7">7"</SelectItem>
-                                    <SelectItem value="liner">Liner</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </td>
-                              <td className="py-2 px-4">
-                                <Button variant="ghost" size="icon" type="button">
-                                  <XIcon className="h-4 w-4" />
-                                </Button>
-                              </td>
-                            </tr>
+                            {drillingPhases.map((phase, index) => (
+                              <tr key={index} className="border-b">
+                                <td className="py-2 px-4">Phase {phase.number}</td>
+                                <td className="py-2 px-4">
+                                  <Select
+                                    value={phase.diameter}
+                                    onValueChange={(value) => updateDrillingPhase(index, "diameter", value)}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue placeholder="Diamètre" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="36">36"</SelectItem>
+                                      <SelectItem value="26">26"</SelectItem>
+                                      <SelectItem value="17.5">17½"</SelectItem>
+                                      <SelectItem value="16">16"</SelectItem>
+                                      <SelectItem value="12.25">12¼"</SelectItem>
+                                      <SelectItem value="8.5">8½"</SelectItem>
+                                      <SelectItem value="6">6"</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Input
+                                    value={phase.depth || ""}
+                                    onChange={(e) =>
+                                      updateDrillingPhase(index, "depth", Number.parseFloat(e.target.value) || 0)
+                                    }
+                                    placeholder="Profondeur"
+                                    className="h-8"
+                                    type="number"
+                                  />
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Select
+                                    value={phase.casing}
+                                    onValueChange={(value) => updateDrillingPhase(index, "casing", value)}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue placeholder="Type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="30">30"</SelectItem>
+                                      <SelectItem value="20">20"</SelectItem>
+                                      <SelectItem value="13-3-8">13⅜"</SelectItem>
+                                      <SelectItem value="9-5-8">9⅝"</SelectItem>
+                                      <SelectItem value="7">7"</SelectItem>
+                                      <SelectItem value="liner">Liner</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Input
+                                    value={phase.duration || ""}
+                                    onChange={(e) =>
+                                      updateDrillingPhase(index, "duration", Number.parseFloat(e.target.value) || 0)
+                                    }
+                                    placeholder="Durée"
+                                    className="h-8"
+                                    type="number"
+                                  />
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    type="button"
+                                    onClick={() => removeDrillingPhase(index)}
+                                    disabled={drillingPhases.length === 1}
+                                  >
+                                    <XIcon className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                         <div className="p-2 flex justify-end">
-                          <Button variant="outline" size="sm" type="button">
+                          <Button variant="outline" size="sm" type="button" onClick={addDrillingPhase}>
+                            <PlusIcon className="mr-2 h-4 w-4" />
                             Ajouter une phase
                           </Button>
                         </div>
@@ -325,33 +635,73 @@ export default function CreateWellPage() {
                     <CardTitle>Planning et budget</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    <div className="flex justify-end mb-2">
+                      {/* Bouton d'importation pour les coûts prévisionnels */}
+                      <input
+                        type="file"
+                        ref={budgetFileInputRef}
+                        onChange={handleBudgetImport}
+                        accept=".csv"
+                        className="hidden"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onClick={() => budgetFileInputRef.current?.click()}
+                      >
+                        <UploadIcon className="mr-2 h-4 w-4" />
+                        Importer CSV
+                      </Button>
+                    </div>
+
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="start-date">Date de début prévue *</Label>
-                        <Input id="start-date" type="date" required />
+                        <Input id="start-date" name="start-date" type="date" required />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="end-date">Date de fin prévue *</Label>
-                        <Input id="end-date" type="date" required />
+                        <Input id="end-date" name="end-date" type="date" required />
                       </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="budget">Budget total estimé (MDA) *</Label>
-                        <Input id="budget" type="number" placeholder="ex: 450" required />
+                        <Input
+                          id="budget"
+                          name="budget"
+                          type="number"
+                          placeholder="ex: 450"
+                          required
+                          value={budgetOperations.length > 0 ? calculateTotalBudget() : undefined}
+                          readOnly={budgetOperations.length > 0}
+                        />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="drilling-days">Jours de forage estimés *</Label>
-                        <Input id="drilling-days" type="number" placeholder="ex: 45" required />
+                        <Input
+                          id="drilling-days"
+                          name="drilling-days"
+                          type="number"
+                          placeholder="ex: 45"
+                          required
+                          value={budgetOperations.length > 0 ? calculateTotalDuration() : undefined}
+                          readOnly={budgetOperations.length > 0}
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="contractor">Prestataire de forage</Label>
-                      <Select>
+                      <Select
+                        name="contractor"
+                        value={formState.contractor}
+                        onValueChange={(value) => handleSelectChange("contractor", value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un prestataire" />
                         </SelectTrigger>
@@ -367,6 +717,83 @@ export default function CreateWellPage() {
                       </Select>
                     </div>
 
+                    {/* Tableau des coûts prévisionnels par opération */}
+                    <div className="space-y-2">
+                      <Label>Coûts prévisionnels par opération</Label>
+                      <div className="border rounded-md">
+                        <table className="min-w-full">
+                          <thead>
+                            <tr className="border-b bg-gray-50">
+                              <th className="py-2 px-4 text-left text-sm font-medium">Opération</th>
+                              <th className="py-2 px-4 text-left text-sm font-medium">Coût (MDA)</th>
+                              <th className="py-2 px-4 text-left text-sm font-medium">Durée (jours)</th>
+                              <th className="py-2 px-4 text-left text-sm font-medium"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {budgetOperations.map((op, index) => (
+                              <tr key={index} className="border-b">
+                                <td className="py-2 px-4">
+                                  <Input
+                                    value={op.operation}
+                                    onChange={(e) => updateBudgetOperation(index, "operation", e.target.value)}
+                                    placeholder="Nom de l'opération"
+                                    className="h-8"
+                                  />
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Input
+                                    value={op.cost || ""}
+                                    onChange={(e) =>
+                                      updateBudgetOperation(index, "cost", Number.parseFloat(e.target.value) || 0)
+                                    }
+                                    placeholder="Coût"
+                                    className="h-8"
+                                    type="number"
+                                  />
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Input
+                                    value={op.duration || ""}
+                                    onChange={(e) =>
+                                      updateBudgetOperation(index, "duration", Number.parseFloat(e.target.value) || 0)
+                                    }
+                                    placeholder="Durée"
+                                    className="h-8"
+                                    type="number"
+                                  />
+                                </td>
+                                <td className="py-2 px-4">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    type="button"
+                                    onClick={() => removeBudgetOperation(index)}
+                                  >
+                                    <XIcon className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                            {budgetOperations.length === 0 && (
+                              <tr>
+                                <td colSpan={4} className="py-4 text-center text-gray-500">
+                                  Aucune opération définie. Importez un fichier CSV ou ajoutez manuellement des
+                                  opérations.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                        <div className="p-2 flex justify-end">
+                          <Button variant="outline" size="sm" type="button" onClick={addBudgetOperation}>
+                            <PlusIcon className="mr-2 h-4 w-4" />
+                            Ajouter une opération
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="team">Équipe responsable</Label>
                       <div className="grid md:grid-cols-3 gap-6">
@@ -374,7 +801,7 @@ export default function CreateWellPage() {
                           <Label htmlFor="manager" className="text-sm text-gray-500">
                             Manager
                           </Label>
-                          <Select>
+                          <Select name="manager">
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -390,7 +817,7 @@ export default function CreateWellPage() {
                           <Label htmlFor="geologist" className="text-sm text-gray-500">
                             Géologue
                           </Label>
-                          <Select>
+                          <Select name="geologist">
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -406,7 +833,7 @@ export default function CreateWellPage() {
                           <Label htmlFor="engineer" className="text-sm text-gray-500">
                             Ingénieur forage
                           </Label>
-                          <Select>
+                          <Select name="engineer">
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
