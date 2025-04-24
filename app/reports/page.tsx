@@ -8,32 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import {
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
+import { XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
 import {
   DownloadIcon,
   FilterIcon,
-  BarChart3Icon,
   PieChartIcon,
   TrendingUpIcon,
   CalendarIcon,
   FileTextIcon,
   PrinterIcon,
   RefreshCwIcon,
+  ClockIcon,
 } from "lucide-react"
 
 // Données simulées pour les graphiques
@@ -63,6 +50,25 @@ const coutData = [
 ]
 
 const COLORS = ["#F08100", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
+
+// Données pour les délais
+const delaisData = [
+  { mois: "Jan", planifie: 45, reel: 48, retard: 3 },
+  { mois: "Fév", planifie: 42, reel: 44, retard: 2 },
+  { mois: "Mar", planifie: 38, reel: 37, retard: -1 },
+  { mois: "Avr", planifie: 40, reel: 43, retard: 3 },
+  { mois: "Mai", planifie: 44, reel: 42, retard: -2 },
+  { mois: "Juin", planifie: 41, reel: 45, retard: 4 },
+  { mois: "Juil", planifie: 39, reel: 38, retard: -1 },
+]
+
+const projetsDelaisData = [
+  { nom: "HMD-42", avancement: 85, retard: -2, statut: "Avance" },
+  { nom: "RKZ-17", avancement: 65, retard: 3, statut: "Retard" },
+  { nom: "GLTZ-08", avancement: 42, retard: 5, statut: "Retard" },
+  { nom: "BRKN-11", avancement: 78, retard: 0, statut: "Dans les temps" },
+  { nom: "ILZ-05", avancement: 92, retard: -1, statut: "Avance" },
+]
 
 export default function ReportsPage() {
   return (
@@ -162,32 +168,6 @@ export default function ReportsPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex flex-col">
-                  <div className="text-sm font-medium text-gray-500 mb-1">Production Pétrole</div>
-                  <div className="text-3xl font-bold">1650 kb/j</div>
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <TrendingUpIcon className="h-4 w-4 mr-1" />
-                    <span>+6.1% vs mois précédent</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col">
-                  <div className="text-sm font-medium text-gray-500 mb-1">Efficacité moyenne</div>
-                  <div className="text-3xl font-bold">90.2%</div>
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <TrendingUpIcon className="h-4 w-4 mr-1" />
-                    <span>+2.3% vs objectif</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col">
                   <div className="text-sm font-medium text-gray-500 mb-1">Coût opérationnel</div>
                   <div className="text-3xl font-bold">8.4 $/bbl</div>
                   <div className="mt-2 flex items-center text-sm text-red-600">
@@ -197,21 +177,43 @@ export default function ReportsPage() {
                 </div>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col">
+                  <div className="text-sm font-medium text-gray-500 mb-1">Délai moyen de réalisation</div>
+                  <div className="text-3xl font-bold">42.4 jours</div>
+                  <div className="mt-2 flex items-center text-sm text-green-600">
+                    <TrendingUpIcon className="h-4 w-4 mr-1" />
+                    <span>-2.6 jours vs objectif</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col">
+                  <div className="text-sm font-medium text-gray-500 mb-1">Projets dans les délais</div>
+                  <div className="text-3xl font-bold">78%</div>
+                  <div className="mt-2 flex items-center text-sm text-amber-600">
+                    <TrendingUpIcon className="h-4 w-4 mr-1" />
+                    <span>-2% vs objectif</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <Tabs defaultValue="production" className="mb-6">
+          <Tabs defaultValue="couts" className="mb-6">
             <TabsList className="mb-4">
-              <TabsTrigger value="production">
-                <BarChart3Icon className="h-4 w-4 mr-2" />
-                Production
-              </TabsTrigger>
-              <TabsTrigger value="performance">
-                <TrendingUpIcon className="h-4 w-4 mr-2" />
-                Performance
-              </TabsTrigger>
               <TabsTrigger value="couts">
                 <PieChartIcon className="h-4 w-4 mr-2" />
                 Analyse des coûts
+              </TabsTrigger>
+              <TabsTrigger value="delais">
+                <ClockIcon className="h-4 w-4 mr-2" />
+                Analyse des délais
               </TabsTrigger>
               <TabsTrigger value="rapports">
                 <FileTextIcon className="h-4 w-4 mr-2" />
@@ -219,195 +221,103 @@ export default function ReportsPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="production">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Production mensuelle 2025</CardTitle>
-                  <CardDescription>Évolution de la production de pétrole (kb/j)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      petrole: {
-                        label: "Pétrole (kb/j)",
-                        color: "hsl(var(--chart-1))",
-                      },
-                    }}
-                    className="h-[400px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={productionData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="mois" />
-                        <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="petrole"
-                          stroke="var(--color-petrole)"
-                          strokeWidth={2}
-                          activeDot={{ r: 8 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+            <TabsContent value="delais">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Respect des délais</CardTitle>
+                    <CardDescription>Comparaison entre délais planifiés et réels (jours)</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer
+                      config={{
+                        planifie: {
+                          label: "Délai planifié (jours)",
+                          color: "hsl(210, 100%, 56%)",
+                        },
+                        reel: {
+                          label: "Délai réel (jours)",
+                          color: "hsl(30, 100%, 56%)",
+                        },
+                      }}
+                      className="h-[400px]"
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={delaisData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="mois" />
+                          <YAxis />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Legend />
+                          <Bar dataKey="planifie" fill="var(--color-planifie)" />
+                          <Bar dataKey="reel" fill="var(--color-reel)" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
 
-                  <div className="mt-6">
-                    <h3 className="text-lg font-medium mb-3">Détails de production par champ</h3>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Champ</TableHead>
-                          <TableHead>Pétrole (kb/j)</TableHead>
-                          <TableHead>Variation mensuelle</TableHead>
-                          <TableHead>Tendance</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell className="font-medium">Hassi Messaoud</TableCell>
-                          <TableCell>580</TableCell>
-                          <TableCell className="text-green-600">+4.2%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">En hausse</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Hassi R'Mel</TableCell>
-                          <TableCell>120</TableCell>
-                          <TableCell className="text-green-600">+7.8%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">En hausse</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Berkine</TableCell>
-                          <TableCell>420</TableCell>
-                          <TableCell className="text-green-600">+5.3%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">En hausse</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Rhourde El Baguel</TableCell>
-                          <TableCell>280</TableCell>
-                          <TableCell className="text-red-600">-1.2%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-red-100 text-red-800">En baisse</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Tin Fouye Tabankort</TableCell>
-                          <TableCell>250</TableCell>
-                          <TableCell className="text-green-600">+8.5%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">En hausse</Badge>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Statut des projets en cours</CardTitle>
+                    <CardDescription>Avancement et respect des délais</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {projetsDelaisData.map((projet, index) => (
+                        <div key={index} className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">{projet.nom}</span>
+                            <Badge
+                              className={
+                                projet.statut === "Avance"
+                                  ? "bg-green-100 text-green-800"
+                                  : projet.statut === "Retard"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-blue-100 text-blue-800"
+                              }
+                            >
+                              {projet.statut}
+                            </Badge>
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full">
+                            <div
+                              className={
+                                projet.statut === "Avance"
+                                  ? "h-2 bg-green-600 rounded-full"
+                                  : projet.statut === "Retard"
+                                    ? "h-2 bg-red-600 rounded-full"
+                                    : "h-2 bg-blue-600 rounded-full"
+                              }
+                              style={{ width: `${projet.avancement}%` }}
+                            ></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Avancement: {projet.avancement}%</span>
+                            <span>
+                              {projet.retard === 0
+                                ? "Dans les temps"
+                                : projet.retard > 0
+                                  ? `Retard: ${projet.retard} jours`
+                                  : `Avance: ${Math.abs(projet.retard)} jours`}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
 
-            <TabsContent value="performance">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Performance des champs pétroliers</CardTitle>
-                  <CardDescription>Efficacité opérationnelle par rapport aux objectifs fixés (%)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      efficacite: {
-                        label: "Efficacité (%)",
-                        color: "hsl(var(--chart-3))",
-                      },
-                      objectif: {
-                        label: "Objectif (%)",
-                        color: "hsl(var(--chart-4))",
-                      },
-                    }}
-                    className="h-[400px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={performanceData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="champ" />
-                        <YAxis domain={[80, 100]} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend />
-                        <Bar dataKey="efficacite" fill="var(--color-efficacite)" />
-                        <Bar dataKey="objectif" fill="var(--color-objectif)" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-
-                  <div className="mt-6">
-                    <h3 className="text-lg font-medium mb-3">Indicateurs de performance clés</h3>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Indicateur</TableHead>
-                          <TableHead>Valeur actuelle</TableHead>
-                          <TableHead>Objectif</TableHead>
-                          <TableHead>Écart</TableHead>
-                          <TableHead>Statut</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell className="font-medium">Taux de disponibilité des équipements</TableCell>
-                          <TableCell>94.2%</TableCell>
-                          <TableCell>95.0%</TableCell>
-                          <TableCell className="text-amber-600">-0.8%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-amber-100 text-amber-800">Proche</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Temps moyen entre pannes (jours)</TableCell>
-                          <TableCell>42</TableCell>
-                          <TableCell>38</TableCell>
-                          <TableCell className="text-green-600">+4</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">Dépassé</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Taux de récupération</TableCell>
-                          <TableCell>36.5%</TableCell>
-                          <TableCell>38.0%</TableCell>
-                          <TableCell className="text-amber-600">-1.5%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-amber-100 text-amber-800">Proche</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Incidents HSE (par million d'heures)</TableCell>
-                          <TableCell>0.8</TableCell>
-                          <TableCell>0.5</TableCell>
-                          <TableCell className="text-red-600">+0.3</TableCell>
-                          <TableCell>
-                            <Badge className="bg-red-100 text-red-800">Attention</Badge>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Conformité réglementaire</TableCell>
-                          <TableCell>98.5%</TableCell>
-                          <TableCell>95.0%</TableCell>
-                          <TableCell className="text-green-600">+3.5%</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">Dépassé</Badge>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                      <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">Délai moyen de réalisation</span>
+                          <Badge className="bg-[#ED8D31] text-white">42.4 jours</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Moyenne des délais réels pour les projets terminés au cours des 6 derniers mois
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="couts">
@@ -533,25 +443,6 @@ export default function ReportsPage() {
                   <div className="space-y-4">
                     <div className="border rounded-md p-4 flex justify-between items-center">
                       <div>
-                        <div className="font-medium">Rapport mensuel de production - Juin 2025</div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          Production détaillée par champ, analyses des tendances et prévisions
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <FileTextIcon className="h-4 w-4 mr-2" />
-                          Consulter
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <DownloadIcon className="h-4 w-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="border rounded-md p-4 flex justify-between items-center">
-                      <div>
                         <div className="font-medium">Rapport trimestriel des coûts - Q2 2025</div>
                         <div className="text-sm text-gray-500 mt-1">
                           Analyse détaillée des coûts opérationnels et d'investissement
@@ -571,9 +462,9 @@ export default function ReportsPage() {
 
                     <div className="border rounded-md p-4 flex justify-between items-center">
                       <div>
-                        <div className="font-medium">Rapport HSE - Juin 2025</div>
+                        <div className="font-medium">Rapport d'analyse des délais - Q2 2025</div>
                         <div className="text-sm text-gray-500 mt-1">
-                          Incidents, mesures correctives et indicateurs de performance HSE
+                          Analyse détaillée des délais de réalisation et des écarts par rapport aux plannings
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -590,9 +481,9 @@ export default function ReportsPage() {
 
                     <div className="border rounded-md p-4 flex justify-between items-center">
                       <div>
-                        <div className="font-medium">Rapport de performance des puits - Juin 2025</div>
+                        <div className="font-medium">Rapport d'optimisation des coûts - Juin 2025</div>
                         <div className="text-sm text-gray-500 mt-1">
-                          Analyse détaillée des performances par puits et recommandations d'optimisation
+                          Recommandations pour l'optimisation des coûts opérationnels
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -609,9 +500,9 @@ export default function ReportsPage() {
 
                     <div className="border rounded-md p-4 flex justify-between items-center">
                       <div>
-                        <div className="font-medium">Rapport d'analyse des réservoirs - Q2 2025</div>
+                        <div className="font-medium">Rapport de performance des délais - Juin 2025</div>
                         <div className="text-sm text-gray-500 mt-1">
-                          Évaluation des réservoirs, modélisation et prévisions de production
+                          Analyse des facteurs impactant les délais et recommandations d'amélioration
                         </div>
                       </div>
                       <div className="flex gap-2">
