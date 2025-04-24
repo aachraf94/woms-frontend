@@ -1,4 +1,3 @@
-// Ajoutons un composant de chargement pour la page de rapports
 import { Skeleton } from "@/components/ui/skeleton"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
@@ -19,28 +18,15 @@ export default function Loading() {
             </div>
             <div className="flex gap-2">
               <Skeleton className="h-9 w-32" />
-              <Skeleton className="h-9 w-32" />
               <Skeleton className="h-9 w-40" />
             </div>
           </div>
 
           <Skeleton className="h-24 w-full mb-6" />
 
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-          </div>
-
           <Skeleton className="h-10 w-full mb-6" />
 
-          <Skeleton className="h-[400px] w-full mb-6" />
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <Skeleton className="h-[350px]" />
-            <Skeleton className="h-[350px]" />
-          </div>
+          <Skeleton className="h-[500px] w-full mb-6" />
         </main>
       </div>
     </div>

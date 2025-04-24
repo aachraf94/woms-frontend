@@ -27,13 +27,13 @@ import { ArrowUpIcon, ArrowDownIcon } from "lucide-react"
 
 // Données simulées pour les graphiques
 const productionData = [
-  { date: "01/07", petrole: 1580, gaz: 2450 },
-  { date: "02/07", petrole: 1620, gaz: 2480 },
-  { date: "03/07", petrole: 1590, gaz: 2520 },
-  { date: "04/07", petrole: 1650, gaz: 2490 },
-  { date: "05/07", petrole: 1680, gaz: 2510 },
-  { date: "06/07", petrole: 1710, gaz: 2550 },
-  { date: "07/07", petrole: 1740, gaz: 2580 },
+  { date: "01/07", petrole: 1580 },
+  { date: "02/07", petrole: 1620 },
+  { date: "03/07", petrole: 1590 },
+  { date: "04/07", petrole: 1650 },
+  { date: "05/07", petrole: 1680 },
+  { date: "06/07", petrole: 1710 },
+  { date: "07/07", petrole: 1740 },
 ]
 
 const efficaciteData = [
@@ -99,7 +99,7 @@ export default function DashboardKpiCharts() {
             <Card>
               <CardHeader>
                 <CardTitle>Production journalière</CardTitle>
-                <CardDescription>Évolution sur les 7 derniers jours (kb/j et Mm³/j)</CardDescription>
+                <CardDescription>Évolution sur les 7 derniers jours (kb/j)</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer
@@ -108,10 +108,6 @@ export default function DashboardKpiCharts() {
                       label: "Pétrole (kb/j)",
                       color: "hsl(30, 100%, 56%)",
                     },
-                    gaz: {
-                      label: "Gaz (Mm³/j)",
-                      color: "hsl(210, 100%, 56%)",
-                    },
                   }}
                   className="h-[300px]"
                 >
@@ -119,19 +115,16 @@ export default function DashboardKpiCharts() {
                     <LineChart data={productionData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" orientation="left" domain={[1500, 1800]} />
-                      <YAxis yAxisId="right" orientation="right" domain={[2400, 2600]} />
+                      <YAxis />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
                       <Line
-                        yAxisId="left"
                         type="monotone"
                         dataKey="petrole"
-                        stroke="#ED8D31"
+                        stroke="var(--color-petrole)"
                         strokeWidth={2}
                         activeDot={{ r: 8 }}
                       />
-                      <Line yAxisId="right" type="monotone" dataKey="gaz" stroke="#0088FE" strokeWidth={2} />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -144,70 +137,27 @@ export default function DashboardKpiCharts() {
                 <CardDescription>Analyse comparative par rapport au mois précédent</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Production pétrole</span>
-                        <div className="flex items-center text-green-600 text-sm">
-                          <ArrowUpIcon className="h-4 w-4 mr-1" />
-                          <span>+3.2%</span>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-gray-200 rounded-full">
-                        <div className="h-2 bg-[#ED8D31] rounded-full" style={{ width: "92%" }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>1580 kb/j</span>
-                        <span>1740 kb/j</span>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Production pétrole</span>
+                      <div className="flex items-center text-green-600 text-sm">
+                        <ArrowUpIcon className="h-4 w-4 mr-1" />
+                        <span>+3.2%</span>
                       </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Production gaz</span>
-                        <div className="flex items-center text-green-600 text-sm">
-                          <ArrowUpIcon className="h-4 w-4 mr-1" />
-                          <span>+2.1%</span>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-gray-200 rounded-full">
-                        <div className="h-2 bg-[#0088FE] rounded-full" style={{ width: "88%" }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>2450 Mm³/j</span>
-                        <span>2580 Mm³/j</span>
-                      </div>
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div className="h-2 bg-[#ED8D31] rounded-full" style={{ width: "92%" }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>1580 kb/j</span>
+                      <span>1740 kb/j</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col justify-center items-center">
-                    <div className="text-center mb-4">
-                      <div className="text-4xl font-bold text-[#ED8D31]">+10.1%</div>
-                      <div className="text-sm text-gray-500">Production totale vs objectif</div>
-                    </div>
-                    <div className="w-full h-[120px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={[
-                              { name: "Pétrole", value: 65 },
-                              { name: "Gaz", value: 35 },
-                            ]}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={30}
-                            outerRadius={50}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          >
-                            <Cell fill="#ED8D31" />
-                            <Cell fill="#0088FE" />
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
+                  <div className="text-center mt-8">
+                    <div className="text-4xl font-bold text-[#ED8D31]">+10.1%</div>
+                    <div className="text-sm text-gray-500">Production totale vs objectif</div>
                   </div>
                 </div>
               </CardContent>
@@ -243,8 +193,8 @@ export default function DashboardKpiCharts() {
                       <YAxis domain={[80, 100]} />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Bar dataKey="efficacite" fill="#ED8D31" />
-                      <Bar dataKey="objectif" fill="#0088FE" />
+                      <Bar dataKey="efficacite" fill="var(--color-efficacite)" />
+                      <Bar dataKey="objectif" fill="var(--color-objectif)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -347,8 +297,20 @@ export default function DashboardKpiCharts() {
                       <YAxis />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Area type="monotone" dataKey="reussite" stackId="1" stroke="#00C49F" fill="#00C49F" />
-                      <Area type="monotone" dataKey="echec" stackId="1" stroke="#FF5252" fill="#FF5252" />
+                      <Area
+                        type="monotone"
+                        dataKey="reussite"
+                        stackId="1"
+                        stroke="var(--color-reussite)"
+                        fill="var(--color-reussite)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="echec"
+                        stackId="1"
+                        stroke="var(--color-echec)"
+                        fill="var(--color-echec)"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -535,9 +497,9 @@ export default function DashboardKpiCharts() {
                       <YAxis />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Bar dataKey="hse" stackId="a" fill="#FF5252" />
-                      <Bar dataKey="technique" stackId="a" fill="#ED8D31" />
-                      <Bar dataKey="logistique" stackId="a" fill="#0088FE" />
+                      <Bar dataKey="hse" stackId="a" fill="var(--color-hse)" />
+                      <Bar dataKey="technique" stackId="a" fill="var(--color-technique)" />
+                      <Bar dataKey="logistique" stackId="a" fill="var(--color-logistique)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>

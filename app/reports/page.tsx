@@ -38,12 +38,12 @@ import {
 
 // Données simulées pour les graphiques
 const productionData = [
-  { mois: "Jan", petrole: 1200, gaz: 850 },
-  { mois: "Fév", petrole: 1350, gaz: 940 },
-  { mois: "Mar", petrole: 1460, gaz: 980 },
-  { mois: "Avr", petrole: 1250, gaz: 920 },
-  { mois: "Mai", petrole: 1550, gaz: 1050 },
-  { mois: "Juin", petrole: 1650, gaz: 1150 },
+  { mois: "Jan", petrole: 1200 },
+  { mois: "Fév", petrole: 1350 },
+  { mois: "Mar", petrole: 1460 },
+  { mois: "Avr", petrole: 1250 },
+  { mois: "Mai", petrole: 1550 },
+  { mois: "Juin", petrole: 1650 },
 ]
 
 const performanceData = [
@@ -158,7 +158,7 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
             <Card>
               <CardContent className="p-6">
                 <div className="flex flex-col">
@@ -167,19 +167,6 @@ export default function ReportsPage() {
                   <div className="mt-2 flex items-center text-sm text-green-600">
                     <TrendingUpIcon className="h-4 w-4 mr-1" />
                     <span>+6.1% vs mois précédent</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col">
-                  <div className="text-sm font-medium text-gray-500 mb-1">Production Gaz</div>
-                  <div className="text-3xl font-bold">1150 Mm³/j</div>
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <TrendingUpIcon className="h-4 w-4 mr-1" />
-                    <span>+9.5% vs mois précédent</span>
                   </div>
                 </div>
               </CardContent>
@@ -236,7 +223,7 @@ export default function ReportsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Production mensuelle 2025</CardTitle>
-                  <CardDescription>Évolution de la production de pétrole et de gaz (kb/j et Mm³/j)</CardDescription>
+                  <CardDescription>Évolution de la production de pétrole (kb/j)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -244,10 +231,6 @@ export default function ReportsPage() {
                       petrole: {
                         label: "Pétrole (kb/j)",
                         color: "hsl(var(--chart-1))",
-                      },
-                      gaz: {
-                        label: "Gaz (Mm³/j)",
-                        color: "hsl(var(--chart-2))",
                       },
                     }}
                     className="h-[400px]"
@@ -259,8 +242,13 @@ export default function ReportsPage() {
                         <YAxis />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Legend />
-                        <Line type="monotone" dataKey="petrole" stroke="#F08100" strokeWidth={2} activeDot={{ r: 8 }} />
-                        <Line type="monotone" dataKey="gaz" stroke="#0088FE" strokeWidth={2} />
+                        <Line
+                          type="monotone"
+                          dataKey="petrole"
+                          stroke="var(--color-petrole)"
+                          strokeWidth={2}
+                          activeDot={{ r: 8 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -272,7 +260,6 @@ export default function ReportsPage() {
                         <TableRow>
                           <TableHead>Champ</TableHead>
                           <TableHead>Pétrole (kb/j)</TableHead>
-                          <TableHead>Gaz (Mm³/j)</TableHead>
                           <TableHead>Variation mensuelle</TableHead>
                           <TableHead>Tendance</TableHead>
                         </TableRow>
@@ -281,7 +268,6 @@ export default function ReportsPage() {
                         <TableRow>
                           <TableCell className="font-medium">Hassi Messaoud</TableCell>
                           <TableCell>580</TableCell>
-                          <TableCell>120</TableCell>
                           <TableCell className="text-green-600">+4.2%</TableCell>
                           <TableCell>
                             <Badge className="bg-green-100 text-green-800">En hausse</Badge>
@@ -290,7 +276,6 @@ export default function ReportsPage() {
                         <TableRow>
                           <TableCell className="font-medium">Hassi R'Mel</TableCell>
                           <TableCell>120</TableCell>
-                          <TableCell>650</TableCell>
                           <TableCell className="text-green-600">+7.8%</TableCell>
                           <TableCell>
                             <Badge className="bg-green-100 text-green-800">En hausse</Badge>
@@ -299,7 +284,6 @@ export default function ReportsPage() {
                         <TableRow>
                           <TableCell className="font-medium">Berkine</TableCell>
                           <TableCell>420</TableCell>
-                          <TableCell>180</TableCell>
                           <TableCell className="text-green-600">+5.3%</TableCell>
                           <TableCell>
                             <Badge className="bg-green-100 text-green-800">En hausse</Badge>
@@ -308,7 +292,6 @@ export default function ReportsPage() {
                         <TableRow>
                           <TableCell className="font-medium">Rhourde El Baguel</TableCell>
                           <TableCell>280</TableCell>
-                          <TableCell>90</TableCell>
                           <TableCell className="text-red-600">-1.2%</TableCell>
                           <TableCell>
                             <Badge className="bg-red-100 text-red-800">En baisse</Badge>
@@ -317,7 +300,6 @@ export default function ReportsPage() {
                         <TableRow>
                           <TableCell className="font-medium">Tin Fouye Tabankort</TableCell>
                           <TableCell>250</TableCell>
-                          <TableCell>110</TableCell>
                           <TableCell className="text-green-600">+8.5%</TableCell>
                           <TableCell>
                             <Badge className="bg-green-100 text-green-800">En hausse</Badge>
@@ -357,8 +339,8 @@ export default function ReportsPage() {
                         <YAxis domain={[80, 100]} />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Legend />
-                        <Bar dataKey="efficacite" fill="#F08100" />
-                        <Bar dataKey="objectif" fill="#0088FE" />
+                        <Bar dataKey="efficacite" fill="var(--color-efficacite)" />
+                        <Bar dataKey="objectif" fill="var(--color-objectif)" />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>

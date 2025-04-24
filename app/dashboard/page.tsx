@@ -35,7 +35,7 @@ export default function DashboardPage() {
                 icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
               },
               {
-                title: "Budget",
+                title: "Budget Forage Pétrole",
                 value: "87.4M DA",
                 change: "98% du prévu",
                 icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
