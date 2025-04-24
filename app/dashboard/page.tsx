@@ -20,7 +20,7 @@ export default function DashboardPage() {
             <p className="text-gray-600">Bienvenue sur le système de gestion des opérations E&P d'Algérie</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-4 mb-6">
+          <div className="grid gap-6 md:grid-cols-3 mb-6">
             {[
               {
                 title: "Puits Actifs",
@@ -32,12 +32,6 @@ export default function DashboardPage() {
                 title: "Avancement Global",
                 value: "72%",
                 change: "Par rapport au planning",
-                icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
-              },
-              {
-                title: "Budget Forage Pétrole",
-                value: "87.4M DA",
-                change: "98% du prévu",
                 icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
               },
               {

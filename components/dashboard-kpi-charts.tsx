@@ -5,8 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import {
-  Line,
-  LineChart,
   BarChart,
   Bar,
   PieChart,
@@ -22,20 +20,12 @@ import {
   ResponsiveContainer,
   RadialBarChart,
   RadialBar,
+  LineChart,
+  Line,
 } from "recharts"
-import { ArrowUpIcon, ArrowDownIcon } from "lucide-react"
+import { ArrowUpIcon, ArrowDownIcon, ClockIcon, CheckCircleIcon, AlertTriangleIcon } from "lucide-react"
 
 // Données simulées pour les graphiques
-const productionData = [
-  { date: "01/07", petrole: 1580 },
-  { date: "02/07", petrole: 1620 },
-  { date: "03/07", petrole: 1590 },
-  { date: "04/07", petrole: 1650 },
-  { date: "05/07", petrole: 1680 },
-  { date: "06/07", petrole: 1710 },
-  { date: "07/07", petrole: 1740 },
-]
-
 const efficaciteData = [
   { champ: "Hassi Messaoud", efficacite: 92, objectif: 90 },
   { champ: "Hassi R'Mel", efficacite: 88, objectif: 90 },
@@ -62,16 +52,6 @@ const coutData = [
   { name: "Autres", value: 5 },
 ]
 
-const incidentsData = [
-  { mois: "Jan", hse: 5, technique: 8, logistique: 3 },
-  { mois: "Fév", hse: 4, technique: 7, logistique: 2 },
-  { mois: "Mar", hse: 3, technique: 6, logistique: 4 },
-  { mois: "Avr", hse: 2, technique: 5, logistique: 3 },
-  { mois: "Mai", hse: 3, technique: 4, logistique: 2 },
-  { mois: "Juin", hse: 2, technique: 3, logistique: 1 },
-  { mois: "Juil", hse: 1, technique: 2, logistique: 1 },
-]
-
 const performanceEquipeData = [
   { name: "Équipe A", performance: 92, fill: "#FF8042" },
   { name: "Équipe B", performance: 88, fill: "#FFBB28" },
@@ -80,48 +60,84 @@ const performanceEquipeData = [
   { name: "Équipe E", performance: 87, fill: "#8884d8" },
 ]
 
+const delaisData = [
+  { mois: "Jan", planifie: 45, reel: 48, retard: 3 },
+  { mois: "Fév", planifie: 42, reel: 44, retard: 2 },
+  { mois: "Mar", planifie: 38, reel: 37, retard: -1 },
+  { mois: "Avr", planifie: 40, reel: 43, retard: 3 },
+  { mois: "Mai", planifie: 44, reel: 42, retard: -2 },
+  { mois: "Juin", planifie: 41, reel: 45, retard: 4 },
+  { mois: "Juil", planifie: 39, reel: 38, retard: -1 },
+]
+
+const projetsDelaisData = [
+  { nom: "HMD-42", avancement: 85, retard: -2, statut: "Avance" },
+  { nom: "RKZ-17", avancement: 65, retard: 3, statut: "Retard" },
+  { nom: "GLTZ-08", avancement: 42, retard: 5, statut: "Retard" },
+  { nom: "BRKN-11", avancement: 78, retard: 0, statut: "Dans les temps" },
+  { nom: "ILZ-05", avancement: 92, retard: -1, statut: "Avance" },
+]
+
+// Nouvelles données pour les indicateurs de délais
+const completionRateData = [
+  { mois: "Jan", taux: 78 },
+  { mois: "Fév", taux: 82 },
+  { mois: "Mar", taux: 85 },
+  { mois: "Avr", taux: 80 },
+  { mois: "Mai", taux: 88 },
+  { mois: "Juin", taux: 92 },
+  { mois: "Juil", taux: 90 },
+]
+
+const projetsEnCoursData = [
+  { nom: "HMD-42", avancement: 85, delaiPrevu: "15/07", statut: "Avance", retard: -2 },
+  { nom: "RKZ-17", avancement: 65, delaiPrevu: "22/07", statut: "Retard", retard: 3 },
+  { nom: "GLTZ-08", avancement: 42, delaiPrevu: "30/07", statut: "Retard", retard: 5 },
+  { nom: "BRKN-11", avancement: 78, delaiPrevu: "18/07", statut: "Dans les temps", retard: 0 },
+  { nom: "ILZ-05", avancement: 92, delaiPrevu: "12/07", statut: "Avance", retard: -1 },
+]
+
 const COLORS = ["#ED8D31", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
 
 export default function DashboardKpiCharts() {
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="production" className="w-full">
+      <Tabs defaultValue="delais" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="production">Production</TabsTrigger>
+          <TabsTrigger value="delais">Délais</TabsTrigger>
           <TabsTrigger value="efficacite">Efficacité</TabsTrigger>
           <TabsTrigger value="forage">Forage</TabsTrigger>
           <TabsTrigger value="couts">Coûts</TabsTrigger>
-          <TabsTrigger value="hse">HSE</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="production">
+        <TabsContent value="delais">
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Production journalière</CardTitle>
-                <CardDescription>Évolution sur les 7 derniers jours (kb/j)</CardDescription>
+                <CardTitle>Taux de projets terminés dans les délais</CardTitle>
+                <CardDescription>Pourcentage mensuel des projets complétés à temps</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={{
-                    petrole: {
-                      label: "Pétrole (kb/j)",
+                    taux: {
+                      label: "Taux de complétion à temps (%)",
                       color: "hsl(30, 100%, 56%)",
                     },
                   }}
                   className="h-[300px]"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={productionData}>
+                    <LineChart data={completionRateData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
+                      <XAxis dataKey="mois" />
+                      <YAxis domain={[70, 100]} />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
                       <Line
                         type="monotone"
-                        dataKey="petrole"
-                        stroke="var(--color-petrole)"
+                        dataKey="taux"
+                        stroke="var(--color-taux)"
                         strokeWidth={2}
                         activeDot={{ r: 8 }}
                       />
@@ -133,31 +149,75 @@ export default function DashboardKpiCharts() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Tendances de production</CardTitle>
-                <CardDescription>Analyse comparative par rapport au mois précédent</CardDescription>
+                <CardTitle>Projets en cours</CardTitle>
+                <CardDescription>Avancement et respect des délais</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Production pétrole</span>
-                      <div className="flex items-center text-green-600 text-sm">
-                        <ArrowUpIcon className="h-4 w-4 mr-1" />
-                        <span>+3.2%</span>
+                  {projetsEnCoursData.map((projet, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-sm font-medium">{projet.nom}</span>
+                          <span className="text-xs text-gray-500 ml-2">Échéance: {projet.delaiPrevu}</span>
+                        </div>
+                        <Badge
+                          className={
+                            projet.statut === "Avance"
+                              ? "bg-green-100 text-green-800"
+                              : projet.statut === "Retard"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-blue-100 text-blue-800"
+                          }
+                        >
+                          {projet.statut === "Avance" ? (
+                            <>
+                              <CheckCircleIcon className="h-3 w-3 mr-1" /> {Math.abs(projet.retard)} j d'avance
+                            </>
+                          ) : projet.statut === "Retard" ? (
+                            <>
+                              <AlertTriangleIcon className="h-3 w-3 mr-1" /> {projet.retard} j de retard
+                            </>
+                          ) : (
+                            <>
+                              <ClockIcon className="h-3 w-3 mr-1" /> Dans les temps
+                            </>
+                          )}
+                        </Badge>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full">
+                        <div
+                          className={
+                            projet.statut === "Avance"
+                              ? "h-2 bg-green-600 rounded-full"
+                              : projet.statut === "Retard"
+                                ? "h-2 bg-red-600 rounded-full"
+                                : "h-2 bg-blue-600 rounded-full"
+                          }
+                          style={{ width: `${projet.avancement}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Avancement: {projet.avancement}%</span>
+                        <span>
+                          {projet.retard === 0
+                            ? "Dans les temps"
+                            : projet.retard > 0
+                              ? `Retard: ${projet.retard} jours`
+                              : `Avance: ${Math.abs(projet.retard)} jours`}
+                        </span>
                       </div>
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-[#ED8D31] rounded-full" style={{ width: "92%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>1580 kb/j</span>
-                      <span>1740 kb/j</span>
-                    </div>
-                  </div>
+                  ))}
 
-                  <div className="text-center mt-8">
-                    <div className="text-4xl font-bold text-[#ED8D31]">+10.1%</div>
-                    <div className="text-sm text-gray-500">Production totale vs objectif</div>
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Délai moyen de réalisation</span>
+                      <Badge className="bg-[#ED8D31] text-white">42.4 jours</Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Moyenne des délais réels pour les projets terminés au cours des 6 derniers mois
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -458,122 +518,6 @@ export default function DashboardKpiCharts() {
                     <p className="text-sm text-gray-600">
                       Potentiel d'économies identifié dans les opérations de forage et la logistique
                     </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="hse">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Incidents HSE</CardTitle>
-                <CardDescription>Évolution mensuelle par type</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    hse: {
-                      label: "Incidents HSE",
-                      color: "hsl(0, 100%, 60%)",
-                    },
-                    technique: {
-                      label: "Incidents techniques",
-                      color: "hsl(30, 100%, 56%)",
-                    },
-                    logistique: {
-                      label: "Incidents logistiques",
-                      color: "hsl(210, 100%, 56%)",
-                    },
-                  }}
-                  className="h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={incidentsData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="mois" />
-                      <YAxis />
-                      <Tooltip content={<ChartTooltipContent />} />
-                      <Legend />
-                      <Bar dataKey="hse" stackId="a" fill="var(--color-hse)" />
-                      <Bar dataKey="technique" stackId="a" fill="var(--color-technique)" />
-                      <Bar dataKey="logistique" stackId="a" fill="var(--color-logistique)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Indicateurs de sécurité</CardTitle>
-                <CardDescription>Performance des indicateurs HSE clés</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Taux d'incidents (par million d'heures)</span>
-                      <Badge className="bg-amber-100 text-amber-800">0.8</Badge>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-amber-500 rounded-full" style={{ width: "160%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Objectif: 0.5</span>
-                      <span>Écart: +0.3</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Jours sans accident</span>
-                      <Badge className="bg-green-100 text-green-800">45 jours</Badge>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "90%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Objectif: 50 jours</span>
-                      <span>Écart: -5 jours</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Conformité aux procédures HSE</span>
-                      <Badge className="bg-green-100 text-green-800">97.5%</Badge>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "97.5%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Objectif: 95%</span>
-                      <span>Écart: +2.5%</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">Incidents à traiter</span>
-                      <Badge className="bg-red-100 text-red-800">3 critiques</Badge>
-                    </div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <div className="flex justify-between">
-                        <span>Perte de boue - HMD-42</span>
-                        <span className="text-amber-600">En cours</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Dépassement budget - GLTZ-08</span>
-                        <span className="text-amber-600">En cours</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Problème de tubage - ILZ-05</span>
-                        <span className="text-green-600">Résolu</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </CardContent>
