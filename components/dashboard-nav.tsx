@@ -28,7 +28,7 @@ export default function DashboardNav() {
       icon: <LayoutDashboardIcon className="h-5 w-5" />,
     },
     {
-      title: "Gestion des projets",
+      title: "Gestion des puits",
       href: "/wells",
       icon: <PipeIcon className="h-5 w-5" />,
     },
