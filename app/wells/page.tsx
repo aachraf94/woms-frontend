@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { getWells } from "@/app/actions/well-actions"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
-import { PlusIcon, SearchIcon, FilterIcon, EyeIcon, EditIcon, X } from "lucide-react"
+import { PlusIcon, SearchIcon, FilterIcon, EyeIcon, EditIcon, X, MapIcon, ListIcon } from "lucide-react"
 import type { Well } from "@/lib/models/well"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
@@ -21,6 +21,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
+// Coordonnées approximatives des bassins pétroliers en Algérie
+const basinCoordinates: Record<string, { x: number; y: number }> = {
+  "Hassi Messaoud": { x: 58, y: 55 },
+  "Hassi R'Mel": { x: 45, y: 48 },
+  Berkine: { x: 65, y: 60 },
+  Illizi: { x: 70, y: 65 },
+  "Rhourde Nouss": { x: 52, y: 58 },
+  "Tin Fouye Tabankort": { x: 62, y: 62 },
+  "Oued Mya": { x: 50, y: 52 },
+  Amenas: { x: 75, y: 63 },
+  Timimoun: { x: 35, y: 60 },
+  Reggane: { x: 30, y: 65 },
+  // Valeurs par défaut pour les bassins non listés
+  default: { x: 50, y: 50 },
+}
 
 export default function WellsPage() {
   const [wells, setWells] = useState<Well[]>([])
@@ -32,12 +49,12 @@ export default function WellsPage() {
     basin: [] as string[],
   })
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  // État temporaire pour les sélections de dropdown
   const [tempSelections, setTempSelections] = useState({
     status: "",
     type: "",
     basin: "",
   })
+  const [viewMode, setViewMode] = useState<"list" | "map">("list")
 
   useEffect(() => {
     async function fetchWells() {
@@ -164,6 +181,27 @@ export default function WellsPage() {
 
   const activeFiltersCount = filters.status.length + filters.type.length + filters.basin.length
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "planned":
+        return "#3B82F6" // blue-500
+      case "in_progress":
+        return "#F97316" // orange-500
+      case "completed":
+        return "#22C55E" // green-500
+      case "suspended":
+        return "#F59E0B" // amber-500
+      case "abandoned":
+        return "#EF4444" // red-500
+      default:
+        return "#6B7280" // gray-500
+    }
+  }
+
+  const getCoordinates = (basin: string) => {
+    return basinCoordinates[basin] || basinCoordinates.default
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
@@ -177,12 +215,34 @@ export default function WellsPage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-1">Gestion des Projets</h1>
               <p className="text-gray-600">Gestion et suivi des projets sur l'ensemble du territoire algérien</p>
             </div>
-            <Link href="/wells/create">
-              <Button className="bg-[#ED8D31] hover:bg-orange-700">
-                <PlusIcon className="mr-2 h-4 w-4" />
-                Nouveau Projet
-              </Button>
-            </Link>
+            <div className="flex space-x-2">
+              <div className="bg-white rounded-lg shadow-sm border p-1 flex">
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={viewMode === "list" ? "bg-[#ED8D31] hover:bg-orange-700" : ""}
+                >
+                  <ListIcon className="h-4 w-4 mr-1" />
+                  Liste
+                </Button>
+                <Button
+                  variant={viewMode === "map" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("map")}
+                  className={viewMode === "map" ? "bg-[#ED8D31] hover:bg-orange-700" : ""}
+                >
+                  <MapIcon className="h-4 w-4 mr-1" />
+                  Carte
+                </Button>
+              </div>
+              <Link href="/wells/create">
+                <Button className="bg-[#ED8D31] hover:bg-orange-700">
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Nouveau Projet
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
@@ -380,114 +440,204 @@ export default function WellsPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold">
-                Liste des projets
-                {filteredWells.length !== wells.length && (
-                  <span className="text-sm font-normal text-gray-500 ml-2">
-                    ({filteredWells.length} sur {wells.length})
-                  </span>
+          {viewMode === "list" ? (
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-4 border-b">
+                <h2 className="text-lg font-semibold">
+                  Liste des projets
+                  {filteredWells.length !== wells.length && (
+                    <span className="text-sm font-normal text-gray-500 ml-2">
+                      ({filteredWells.length} sur {wells.length})
+                    </span>
+                  )}
+                </h2>
+              </div>
+              <div className="overflow-x-auto">
+                {loading ? (
+                  <div className="p-8 text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Chargement des projets...</p>
+                  </div>
+                ) : filteredWells.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <p className="text-gray-600">
+                      {searchTerm || activeFiltersCount > 0
+                        ? "Aucun projet ne correspond aux critères de recherche ou aux filtres sélectionnés"
+                        : "Aucun projet trouvé"}
+                    </p>
+                    {searchTerm || activeFiltersCount > 0 ? (
+                      <Button
+                        className="mt-4"
+                        variant="outline"
+                        onClick={() => {
+                          setSearchTerm("")
+                          clearFilters()
+                        }}
+                      >
+                        Effacer la recherche et les filtres
+                      </Button>
+                    ) : (
+                      <Link href="/wells/create">
+                        <Button className="mt-4 bg-[#ED8D31] hover:bg-orange-700">
+                          <PlusIcon className="mr-2 h-4 w-4" />
+                          Créer un projet
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Nom du Projet
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Localisation
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Profondeur
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Statut
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredWells.map((well) => {
+                        const status = getStatusDisplay(well.status)
+                        return (
+                          <tr key={well.id}>
+                            <td className="px-6 py-4 whitespace-nowrap font-medium">{well.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{well.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{well.basin}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{getTypeDisplay(well.type)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{well.targetDepth} m</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <Badge className={status.class}>{status.text}</Badge>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex space-x-2">
+                                <Link href={`/wells/${well.id}`}>
+                                  <Button variant="ghost" size="sm" className="flex items-center">
+                                    <EyeIcon className="h-4 w-4 mr-1" />
+                                    Voir
+                                  </Button>
+                                </Link>
+                                <Link href={`/wells/${well.id}/edit`}>
+                                  <Button variant="ghost" size="sm" className="flex items-center">
+                                    <EditIcon className="h-4 w-4 mr-1" />
+                                    Éditer
+                                  </Button>
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
                 )}
-              </h2>
+              </div>
             </div>
-            <div className="overflow-x-auto">
+          ) : (
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <div className="p-4 border-b">
+                <h2 className="text-lg font-semibold">
+                  Carte des projets
+                  {filteredWells.length !== wells.length && (
+                    <span className="text-sm font-normal text-gray-500 ml-2">
+                      ({filteredWells.length} sur {wells.length})
+                    </span>
+                  )}
+                </h2>
+              </div>
+
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Chargement des projets...</p>
-                </div>
-              ) : filteredWells.length === 0 ? (
-                <div className="p-8 text-center">
-                  <p className="text-gray-600">
-                    {searchTerm || activeFiltersCount > 0
-                      ? "Aucun projet ne correspond aux critères de recherche ou aux filtres sélectionnés"
-                      : "Aucun projet trouvé"}
-                  </p>
-                  {searchTerm || activeFiltersCount > 0 ? (
-                    <Button
-                      className="mt-4"
-                      variant="outline"
-                      onClick={() => {
-                        setSearchTerm("")
-                        clearFilters()
-                      }}
-                    >
-                      Effacer la recherche et les filtres
-                    </Button>
-                  ) : (
-                    <Link href="/wells/create">
-                      <Button className="mt-4 bg-[#ED8D31] hover:bg-orange-700">
-                        <PlusIcon className="mr-2 h-4 w-4" />
-                        Créer un projet
-                      </Button>
-                    </Link>
-                  )}
+                  <p className="mt-4 text-gray-600">Chargement de la carte...</p>
                 </div>
               ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nom du Projet
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Localisation
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Profondeur
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Statut
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                <div className="relative mt-4">
+                  <div className="w-full h-[600px] bg-gray-100 rounded-lg overflow-hidden relative">
+                    <img src="/algeria-map.svg" alt="Carte de l'Algérie" className="w-full h-full object-contain p-4" />
+
+                    {/* Légende */}
+                    <div className="absolute top-4 right-4 bg-white p-3 rounded-lg shadow-md z-10">
+                      <h3 className="text-sm font-semibold mb-2">Légende</h3>
+                      <div className="space-y-1">
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                          <span className="text-xs">Planifié</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
+                          <span className="text-xs">En cours</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                          <span className="text-xs">Terminé</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+                          <span className="text-xs">Suspendu</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                          <span className="text-xs">Abandonné</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Points des projets */}
                     {filteredWells.map((well) => {
-                      const status = getStatusDisplay(well.status)
+                      const coords = getCoordinates(well.basin)
                       return (
-                        <tr key={well.id}>
-                          <td className="px-6 py-4 whitespace-nowrap font-medium">{well.id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{well.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{well.basin}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{getTypeDisplay(well.type)}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{well.targetDepth} m</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge className={status.class}>{status.text}</Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex space-x-2">
-                              <Link href={`/wells/${well.id}`}>
-                                <Button variant="ghost" size="sm" className="flex items-center">
-                                  <EyeIcon className="h-4 w-4 mr-1" />
-                                  Voir
-                                </Button>
-                              </Link>
-                              <Link href={`/wells/${well.id}/edit`}>
-                                <Button variant="ghost" size="sm" className="flex items-center">
-                                  <EditIcon className="h-4 w-4 mr-1" />
-                                  Éditer
-                                </Button>
-                              </Link>
-                            </div>
-                          </td>
-                        </tr>
+                        <TooltipProvider key={well.id}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className="absolute w-4 h-4 rounded-full cursor-pointer transform -translate-x-1/2 -translate-y-1/2 hover:scale-150 transition-transform"
+                                style={{
+                                  backgroundColor: getStatusColor(well.status),
+                                  left: `${coords.x}%`,
+                                  top: `${coords.y}%`,
+                                  boxShadow: "0 0 0 2px white",
+                                }}
+                              ></div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="p-1">
+                                <p className="font-semibold">{well.name}</p>
+                                <p className="text-sm">Bassin: {well.basin}</p>
+                                <p className="text-sm">Type: {getTypeDisplay(well.type)}</p>
+                                <p className="text-sm">Statut: {getStatusDisplay(well.status).text}</p>
+                                <div className="mt-1 pt-1 border-t border-gray-200">
+                                  <Link href={`/wells/${well.id}`} className="text-xs text-blue-600 hover:underline">
+                                    Voir les détails
+                                  </Link>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )
                     })}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
               )}
             </div>
-          </div>
+          )}
         </main>
       </div>
     </div>
