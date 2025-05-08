@@ -23,7 +23,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-3 mb-6">
             {[
               {
-                title: "Puits Actifs",
+                title: "Projets Actifs",
                 value: "24",
                 change: "+2 cette semaine",
                 icon: <LayoutDashboardIcon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
@@ -74,7 +74,7 @@ export default function DashboardPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="border-none shadow-md">
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-4">Puits récents</h2>
+                <h2 className="text-xl font-bold mb-4">Projets récents</h2>
                 <div className="space-y-4">
                   {[
                     {
@@ -105,29 +105,29 @@ export default function DashboardPage() {
                       phase: "Terminé",
                       status: "Complété",
                     },
-                  ].map((well, index) => (
+                  ].map((project, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow"
                     >
                       <div>
                         <div className="font-medium">
-                          {well.name} ({well.location})
+                          {project.name} ({project.location})
                         </div>
                         <div className="text-sm text-gray-500 mt-1">
-                          {well.type} - {well.phase}
+                          {project.type} - {project.phase}
                         </div>
                       </div>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          well.status === "En cours"
+                          project.status === "En cours"
                             ? "bg-orange-100 text-orange-800"
-                            : well.status === "En retard"
+                            : project.status === "En retard"
                               ? "bg-amber-100 text-amber-800"
                               : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {well.status}
+                        {project.status}
                       </span>
                     </div>
                   ))}
@@ -141,9 +141,9 @@ export default function DashboardPage() {
                 <div className="space-y-4">
                   {[
                     { activity: "Logging - HMD-42", date: "12/07/2025", team: "Équipe Schlumberger" },
-                    { activity: "Test de puits - RKZ-17", date: "15/07/2025", team: "Équipe Weatherford" },
+                    { activity: "Test de projet - RKZ-17", date: "15/07/2025", team: "Équipe Weatherford" },
                     { activity: "Cimentation - GLTZ-08", date: "18/07/2025", team: "Équipe Halliburton" },
-                    { activity: "Démarrage forage - ILZ-05", date: "22/07/2025", team: "Bloc Illizi" },
+                    { activity: "Démarrage projet - ILZ-05", date: "22/07/2025", team: "Bloc Illizi" },
                   ].map((activity, index) => (
                     <div
                       key={index}

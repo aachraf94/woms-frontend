@@ -44,12 +44,23 @@ const forageData = [
   { mois: "Juil", reussite: 91, echec: 9 },
 ]
 
-const coutData = [
-  { name: "Équipement", value: 42 },
-  { name: "Personnel", value: 28 },
-  { name: "Services", value: 15 },
-  { name: "Logistique", value: 10 },
-  { name: "Autres", value: 5 },
+// Nouvelles données pour les coûts des opérations spécifiques
+const coutOperationsData = [
+  { name: "Forage", value: 45 },
+  { name: "Diagraphie", value: 18 },
+  { name: "Cimentation", value: 15 },
+  { name: "Tests de puits", value: 12 },
+  { name: "Maintenance", value: 10 },
+]
+
+// Données d'évolution des coûts par opération
+const coutEvolutionData = [
+  { mois: "Jan", forage: 450, diagraphie: 180, cimentation: 150, tests: 120, maintenance: 100 },
+  { mois: "Fév", forage: 460, diagraphie: 175, cimentation: 155, tests: 125, maintenance: 95 },
+  { mois: "Mar", forage: 455, diagraphie: 185, cimentation: 145, tests: 130, maintenance: 105 },
+  { mois: "Avr", forage: 470, diagraphie: 190, cimentation: 160, tests: 125, maintenance: 110 },
+  { mois: "Mai", forage: 465, diagraphie: 180, cimentation: 155, tests: 135, maintenance: 100 },
+  { mois: "Juin", forage: 480, diagraphie: 195, cimentation: 165, tests: 140, maintenance: 115 },
 ]
 
 const performanceEquipeData = [
@@ -97,18 +108,239 @@ const projetsEnCoursData = [
   { nom: "ILZ-05", avancement: 92, delaiPrevu: "12/07", statut: "Avance", retard: -1 },
 ]
 
+// Données pour les coûts par mètre foré
+const coutMetreData = [
+  { projet: "HMD-42", cout: 4200, objectif: 4000 },
+  { projet: "RKZ-17", cout: 4500, objectif: 4200 },
+  { projet: "GLTZ-08", cout: 3900, objectif: 4100 },
+  { projet: "BRKN-11", cout: 4300, objectif: 4200 },
+  { projet: "ILZ-05", cout: 4100, objectif: 4000 },
+]
+
 const COLORS = ["#ED8D31", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
 
 export default function DashboardKpiCharts() {
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="delais" className="w-full">
+      <Tabs defaultValue="couts" className="w-full">
         <TabsList className="mb-4">
+          <TabsTrigger value="couts">Coûts</TabsTrigger>
           <TabsTrigger value="delais">Délais</TabsTrigger>
           <TabsTrigger value="efficacite">Efficacité</TabsTrigger>
           <TabsTrigger value="forage">Forage</TabsTrigger>
-          <TabsTrigger value="couts">Coûts</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="couts">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition des coûts par opération</CardTitle>
+                <CardDescription>Ventilation des coûts opérationnels (%)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={coutOperationsData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {coutOperationsData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Évolution des coûts par opération</CardTitle>
+                <CardDescription>Tendance sur les 6 derniers mois (M DA)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    forage: {
+                      label: "Forage",
+                      color: "hsl(30, 100%, 56%)",
+                    },
+                    diagraphie: {
+                      label: "Diagraphie",
+                      color: "hsl(210, 100%, 56%)",
+                    },
+                    cimentation: {
+                      label: "Cimentation",
+                      color: "hsl(150, 100%, 40%)",
+                    },
+                    tests: {
+                      label: "Tests de puits",
+                      color: "hsl(45, 100%, 56%)",
+                    },
+                    maintenance: {
+                      label: "Maintenance",
+                      color: "hsl(0, 100%, 60%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={coutEvolutionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="mois" />
+                      <YAxis />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Line type="monotone" dataKey="forage" stroke="var(--color-forage)" strokeWidth={2} />
+                      <Line type="monotone" dataKey="diagraphie" stroke="var(--color-diagraphie)" />
+                      <Line type="monotone" dataKey="cimentation" stroke="var(--color-cimentation)" />
+                      <Line type="monotone" dataKey="tests" stroke="var(--color-tests)" />
+                      <Line type="monotone" dataKey="maintenance" stroke="var(--color-maintenance)" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Coût par mètre foré</CardTitle>
+                <CardDescription>Comparaison avec les objectifs (DA/m)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    cout: {
+                      label: "Coût réel (DA/m)",
+                      color: "hsl(30, 100%, 56%)",
+                    },
+                    objectif: {
+                      label: "Objectif (DA/m)",
+                      color: "hsl(210, 100%, 56%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={coutMetreData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="projet" />
+                      <YAxis domain={[3500, 4600]} />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar dataKey="cout" fill="var(--color-cout)" />
+                      <Bar dataKey="objectif" fill="var(--color-objectif)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Indicateurs de coûts par opération</CardTitle>
+                <CardDescription>Variation par rapport au mois précédent</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Forage (M DA/jour)</span>
+                      <div className="flex items-center text-red-600 text-sm">
+                        <ArrowUpIcon className="h-4 w-4 mr-1" />
+                        <span>+0.3</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div className="h-2 bg-red-600 rounded-full" style={{ width: "103%" }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Mois précédent: 9.7</span>
+                      <span>Actuel: 10.0</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Diagraphie (M DA/opération)</span>
+                      <div className="flex items-center text-green-600 text-sm">
+                        <ArrowDownIcon className="h-4 w-4 mr-1" />
+                        <span>-0.5</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "95%" }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Mois précédent: 8.5</span>
+                      <span>Actuel: 8.0</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Cimentation (M DA/opération)</span>
+                      <div className="flex items-center text-amber-600 text-sm">
+                        <ArrowUpIcon className="h-4 w-4 mr-1" />
+                        <span>+0.1</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div className="h-2 bg-amber-500 rounded-full" style={{ width: "101%" }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Mois précédent: 7.2</span>
+                      <span>Actuel: 7.3</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Tests de puits (M DA/test)</span>
+                      <div className="flex items-center text-green-600 text-sm">
+                        <ArrowDownIcon className="h-4 w-4 mr-1" />
+                        <span>-0.3</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "96%" }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Mois précédent: 6.8</span>
+                      <span>Actuel: 6.5</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Maintenance pompes (M DA/intervention)</span>
+                      <div className="flex items-center text-red-600 text-sm">
+                        <ArrowUpIcon className="h-4 w-4 mr-1" />
+                        <span>+0.4</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div className="h-2 bg-red-600 rounded-full" style={{ width: "108%" }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Mois précédent: 5.2</span>
+                      <span>Actuel: 5.6</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="delais">
           <div className="grid md:grid-cols-2 gap-6">
@@ -414,111 +646,6 @@ export default function DashboardKpiCharts() {
                       <Tooltip />
                     </RadialBarChart>
                   </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="couts">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition des coûts opérationnels</CardTitle>
-                <CardDescription>Ventilation par catégorie (%)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={coutData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {coutData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Évolution des coûts</CardTitle>
-                <CardDescription>Tendance sur les 6 derniers mois (M DA)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Coût par baril ($/bbl)</span>
-                      <div className="flex items-center text-green-600 text-sm">
-                        <ArrowDownIcon className="h-4 w-4 mr-1" />
-                        <span>-0.5</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "94%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Mois précédent: 8.9</span>
-                      <span>Actuel: 8.4</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Coût de forage (M DA/m)</span>
-                      <div className="flex items-center text-red-600 text-sm">
-                        <ArrowUpIcon className="h-4 w-4 mr-1" />
-                        <span>+0.2</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-red-600 rounded-full" style={{ width: "105%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Mois précédent: 0.45</span>
-                      <span>Actuel: 0.47</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Coûts logistiques (M DA)</span>
-                      <div className="flex items-center text-green-600 text-sm">
-                        <ArrowDownIcon className="h-4 w-4 mr-1" />
-                        <span>-12.5</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "92%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Mois précédent: 162.5</span>
-                      <span>Actuel: 150.0</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">Opportunités d'optimisation</span>
-                      <Badge className="bg-[#ED8D31] text-white">195M DA</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Potentiel d'économies identifié dans les opérations de forage et la logistique
-                    </p>
-                  </div>
                 </div>
               </CardContent>
             </Card>
