@@ -29,9 +29,9 @@ export default function DashboardPage() {
                 icon: <LayoutDashboardIcon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
               },
               {
-                title: "Avancement Global",
-                value: "72%",
-                change: "Par rapport au planning",
+                title: "Projets dans les délais",
+                value: "85%",
+                change: "4 sur 5 projets",
                 icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
               },
               {
