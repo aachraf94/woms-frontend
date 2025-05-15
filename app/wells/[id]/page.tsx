@@ -9,7 +9,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Area, AreaChart, Line, LineChart, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
-import { ArrowLeftIcon, FileIcon, DownloadIcon, ClipboardListIcon } from "lucide-react"
+import { ArrowLeftIcon, FileIcon, DownloadIcon, ClipboardListIcon, ArrowRightIcon } from "lucide-react"
 import Link from "next/link"
 
 // Données simulées pour les graphiques
@@ -139,6 +139,7 @@ export default function WellDetailsPage() {
               <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
               <TabsTrigger value="daily">Suivi journalier</TabsTrigger>
               <TabsTrigger value="technical">Données techniques</TabsTrigger>
+              <TabsTrigger value="wellschema">Schéma du puits</TabsTrigger>
               <TabsTrigger value="costs">Coûts</TabsTrigger>
               <TabsTrigger value="incidents">Incidents</TabsTrigger>
             </TabsList>
@@ -454,6 +455,186 @@ export default function WellDetailsPage() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="wellschema">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Schéma du puits</CardTitle>
+                  </CardHeader>
+                  <CardContent className="relative min-h-[600px] flex items-center justify-center">
+                    {/* Ligne centrale du puits */}
+                    <div className="absolute h-[550px] w-1 bg-gray-700 z-0"></div>
+
+                    {/* Tête de puits */}
+                    <div className="absolute top-0 w-8 h-12 bg-gray-500 z-10"></div>
+
+                    {/* Phase 1 - 26" */}
+                    <div className="absolute top-[50px] w-16 h-[100px] bg-green-200 z-10"></div>
+                    <div className="absolute top-[100px] left-[20px] flex items-center">
+                      <span className="font-medium mr-2">26"</span>
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
+                    <div className="absolute top-[50px] right-[50%] ml-[50px] text-xs">0m</div>
+                    <div className="absolute top-[150px] right-[50%] ml-[50px] text-xs">150m</div>
+
+                    {/* Phase 2 - 17½" */}
+                    <div className="absolute top-[150px] w-12 h-[100px] bg-green-200 z-10"></div>
+                    <div className="absolute top-[200px] left-[20px] flex items-center">
+                      <span className="font-medium mr-2">17½"</span>
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
+                    <div className="absolute top-[250px] right-[50%] ml-[50px] text-xs">450m</div>
+
+                    {/* Phase 3 - 12¼" (en cours) */}
+                    <div className="absolute top-[250px] w-10 h-[100px] bg-orange-200 z-10"></div>
+                    <div className="absolute top-[300px] left-[20px] flex items-center">
+                      <span className="font-medium mr-2">12¼"</span>
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
+                    <div className="absolute top-[290px] right-[50%] ml-[50px] text-xs text-red-500 font-medium">
+                      640m (actuel)
+                    </div>
+                    <div className="absolute top-[350px] right-[50%] ml-[50px] text-xs">850m</div>
+
+                    {/* Phase 4 - 8½" (planifiée) */}
+                    <div className="absolute top-[350px] w-8 h-[100px] bg-gray-200 z-10"></div>
+                    <div className="absolute top-[400px] left-[20px] flex items-center">
+                      <span className="font-medium mr-2">8½"</span>
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
+                    <div className="absolute top-[450px] right-[50%] ml-[50px] text-xs">3500m</div>
+
+                    {/* Réservoirs */}
+                    <div className="absolute top-[470px] w-[120px] h-6 bg-yellow-200 z-10 left-[50%] ml-[-60px]"></div>
+                    <div className="absolute top-[470px] right-[30px] text-xs">R1</div>
+
+                    <div className="absolute top-[500px] w-[120px] h-6 bg-yellow-200 z-10 left-[50%] ml-[-60px]"></div>
+                    <div className="absolute top-[500px] right-[30px] text-xs">R2</div>
+
+                    <div className="absolute top-[530px] w-[120px] h-6 bg-yellow-200 z-10 left-[50%] ml-[-60px]"></div>
+                    <div className="absolute top-[530px] right-[30px] text-xs">R3 3500m</div>
+
+                    {/* Légende */}
+                    <div className="absolute bottom-0 left-0 flex items-center gap-4">
+                      <div className="text-sm font-medium">État d'avancement:</div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span className="text-xs">Complété</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                        <span className="text-xs">En cours</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+                        <span className="text-xs">Planifié</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Informations sur les phases</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-3 px-4 font-medium">Phase</th>
+                              <th className="text-left py-3 px-4 font-medium">Diamètre</th>
+                              <th className="text-left py-3 px-4 font-medium">Profondeur (m)</th>
+                              <th className="text-left py-3 px-4 font-medium">Tubage</th>
+                              <th className="text-left py-3 px-4 font-medium">Statut</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b">
+                              <td className="py-3 px-4">1</td>
+                              <td className="py-3 px-4">26"</td>
+                              <td className="py-3 px-4">0-150</td>
+                              <td className="py-3 px-4">20"</td>
+                              <td className="py-3 px-4">
+                                <Badge className="bg-green-100 text-green-800">Terminé</Badge>
+                              </td>
+                            </tr>
+                            <tr className="border-b">
+                              <td className="py-3 px-4">2</td>
+                              <td className="py-3 px-4">17½"</td>
+                              <td className="py-3 px-4">150-450</td>
+                              <td className="py-3 px-4">13⅜"</td>
+                              <td className="py-3 px-4">
+                                <Badge className="bg-green-100 text-green-800">Terminé</Badge>
+                              </td>
+                            </tr>
+                            <tr className="border-b">
+                              <td className="py-3 px-4">3</td>
+                              <td className="py-3 px-4">12¼"</td>
+                              <td className="py-3 px-4">450-850</td>
+                              <td className="py-3 px-4">-</td>
+                              <td className="py-3 px-4">
+                                <Badge className="bg-orange-100 text-orange-800">En cours</Badge>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="py-3 px-4">4</td>
+                              <td className="py-3 px-4">8½"</td>
+                              <td className="py-3 px-4">850-3500</td>
+                              <td className="py-3 px-4">-</td>
+                              <td className="py-3 px-4">
+                                <Badge className="bg-gray-100 text-gray-800">Planifié</Badge>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Réservoirs cibles</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="border-b pb-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">R1</div>
+                              <div className="text-sm text-gray-500">Profondeur: 2800m</div>
+                            </div>
+                            <Badge className="bg-gray-100 text-gray-800">Non atteint</Badge>
+                          </div>
+                        </div>
+
+                        <div className="border-b pb-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">R2</div>
+                              <div className="text-sm text-gray-500">Profondeur: 3100m</div>
+                            </div>
+                            <Badge className="bg-gray-100 text-gray-800">Non atteint</Badge>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">R3</div>
+                              <div className="text-sm text-gray-500">Profondeur: 3400m</div>
+                            </div>
+                            <Badge className="bg-gray-100 text-gray-800">Non atteint</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </main>
