@@ -27,7 +27,7 @@ export default function DashboardHeader() {
 
           <Link href="/dashboard" className="flex items-center gap-2">
             <img src="/sonatrach-logo-vector.svg" alt="Sonatrach Logo" className="h-10" />
-            <span className="font-bold text-xl hidden sm:inline">SonatrachEP</span>
+            <span className="font-bold text-xl hidden sm:inline">SonatrackEP</span>
           </Link>
         </div>
 

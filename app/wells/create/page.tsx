@@ -211,8 +211,96 @@ export default function CreateWellPage() {
     setLoading(true)
 
     try {
+      // Validation des champs obligatoires
+      const wellName = formData.get("well-name") as string
+      const wellType = formData.get("well-type") as string
+      const basin = formData.get("basin") as string
+      const latitude = formData.get("latitude") as string
+      const longitude = formData.get("longitude") as string
+      const targetDepth = formData.get("target-depth") as string
+      const startDate = formData.get("start-date") as string
+      const endDate = formData.get("end-date") as string
+      const budget = formData.get("budget") as string
+      const drillingDays = formData.get("drilling-days") as string
+
+      // Vérification des champs obligatoires
+      if (
+        !wellName ||
+        !wellType ||
+        !basin ||
+        !latitude ||
+        !longitude ||
+        !targetDepth ||
+        !startDate ||
+        !endDate ||
+        !budget ||
+        !drillingDays
+      ) {
+        toast({
+          title: "Erreur de validation",
+          description: "Veuillez remplir tous les champs obligatoires",
+          variant: "destructive",
+        })
+        setLoading(false)
+        return
+      }
+
+      // Validation des dates
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      if (end <= start) {
+        toast({
+          title: "Erreur de validation",
+          description: "La date de fin doit être postérieure à la date de début",
+          variant: "destructive",
+        })
+        setLoading(false)
+        return
+      }
+
+      // Validation des valeurs numériques
+      if (isNaN(Number.parseFloat(targetDepth)) || Number.parseFloat(targetDepth) <= 0) {
+        toast({
+          title: "Erreur de validation",
+          description: "La profondeur cible doit être un nombre positif",
+          variant: "destructive",
+        })
+        setLoading(false)
+        return
+      }
+
+      if (isNaN(Number.parseFloat(budget)) || Number.parseFloat(budget) <= 0) {
+        toast({
+          title: "Erreur de validation",
+          description: "Le budget doit être un nombre positif",
+          variant: "destructive",
+        })
+        setLoading(false)
+        return
+      }
+
+      if (isNaN(Number.parseFloat(drillingDays)) || Number.parseFloat(drillingDays) <= 0) {
+        toast({
+          title: "Erreur de validation",
+          description: "Le nombre de jours de forage doit être un nombre positif",
+          variant: "destructive",
+        })
+        setLoading(false)
+        return
+      }
+
       // Ajouter les phases de forage au formData
       drillingPhases.forEach((phase, index) => {
+        if (!phase.diameter || phase.depth <= 0 || !phase.casing) {
+          toast({
+            title: "Erreur de validation",
+            description: `Veuillez compléter toutes les informations pour la phase ${index + 1}`,
+            variant: "destructive",
+          })
+          setLoading(false)
+          return
+        }
+
         formData.append(`phase${index + 1}-diameter`, phase.diameter)
         formData.append(`phase${index + 1}-depth`, phase.depth.toString())
         formData.append(`phase${index + 1}-casing`, phase.casing)
@@ -220,43 +308,124 @@ export default function CreateWellPage() {
       })
 
       // Ajouter les opérations budgétaires au formData
+      let totalBudget = 0
+      let totalDuration = 0
+
       budgetOperations.forEach((op, index) => {
+        if (!op.operation || op.cost <= 0) {
+          toast({
+            title: "Erreur de validation",
+            description: `Veuillez compléter toutes les informations pour l'opération ${index + 1}`,
+            variant: "destructive",
+          })
+          setLoading(false)
+          return
+        }
+
         formData.append(`operation${index + 1}-name`, op.operation)
         formData.append(`operation${index + 1}-cost`, op.cost.toString())
         formData.append(`operation${index + 1}-duration`, op.duration.toString())
+
+        totalBudget += op.cost
+        totalDuration += op.duration
       })
 
-      // Mettre à jour le budget total et la durée totale si nécessaire
+      // Mettre à jour le budget total et la durée totale si des opérations sont définies
       if (budgetOperations.length > 0) {
-        formData.set("budget", calculateTotalBudget().toString())
-        formData.set("drilling-days", calculateTotalDuration().toString())
+        formData.set("budget", totalBudget.toString())
+        formData.set("drilling-days", totalDuration.toString())
       }
 
+      // Générer un ID de projet basé sur le bassin et le champ
+      const field = (formData.get("field") as string) || ""
+      const basinPrefix = basin.substring(0, 3).toUpperCase()
+      const fieldPrefix = field ? field.substring(0, 2).toUpperCase() : "XX"
+      const randomNum = Math.floor(Math.random() * 100)
+        .toString()
+        .padStart(2, "0")
+      const projectId = `${basinPrefix}-${fieldPrefix}${randomNum}`
+
+      // Ajouter l'ID généré au formData
+      formData.append("project-id", projectId)
+
+      // Simuler un délai réseau pour l'appel API
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Créer un nouvel objet projet à partir des données du formulaire
+      const newProject = {
+        id: projectId,
+        name: wellName,
+        type: wellType,
+        basin: basin,
+        field: field,
+        latitude: Number.parseFloat(latitude),
+        longitude: Number.parseFloat(longitude),
+        description: (formData.get("description") as string) || "",
+        targetDepth: Number.parseFloat(targetDepth),
+        trajectory: (formData.get("trajectory") as string) || "vertical",
+        primaryReservoir: (formData.get("reservoir1") as string) || "",
+        secondaryReservoir: (formData.get("reservoir2") as string) || "",
+        tertiaryReservoir: (formData.get("reservoir3") as string) || "",
+        startDate: startDate,
+        endDate: endDate,
+        budget: Number.parseFloat(budget),
+        drillingDays: Number.parseFloat(drillingDays),
+        contractor: (formData.get("contractor") as string) || "",
+        status: "planned",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        team: {
+          manager: (formData.get("manager") as string) || "",
+          geologist: (formData.get("geologist") as string) || "",
+          engineer: (formData.get("engineer") as string) || "",
+        },
+        drillingProgram: {
+          phases: drillingPhases.map((phase) => ({
+            number: phase.number,
+            diameter: phase.diameter,
+            depth: phase.depth,
+            casing: phase.casing,
+            duration: phase.duration,
+          })),
+        },
+        budgetDetails: {
+          operations: budgetOperations.map((op) => ({
+            name: op.operation,
+            cost: op.cost,
+            duration: op.duration,
+          })),
+        },
+      }
+
+      // Appel au service de création de projet (simulé ici)
       const result = await createWell(formData)
 
       if (result.success) {
+        // Afficher un message de succès
         toast({
-          title: "Succès",
-          description: result.message,
+          title: "Projet créé avec succès",
+          description: `Le projet ${projectId} a été créé avec succès`,
           variant: "default",
         })
 
-        // Redirection vers la liste des puits après un court délai
+        // Redirection vers la liste des projets après un court délai
         setTimeout(() => {
           router.push("/wells")
-        }, 1000)
+        }, 1500)
       } else {
+        // Afficher un message d'erreur
         toast({
           title: "Erreur",
-          description: result.message,
+          description: result.message || "Une erreur est survenue lors de la création du projet",
           variant: "destructive",
         })
         setLoading(false)
       }
     } catch (error) {
+      console.error("Erreur lors de la création du projet:", error)
       toast({
         title: "Erreur",
-        description: "Une erreur inattendue est survenue",
+        description: "Une erreur inattendue est survenue lors de la création du projet",
         variant: "destructive",
       })
       setLoading(false)
@@ -278,8 +447,8 @@ export default function CreateWellPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">Création d'un Nouveau Puits</h1>
-              <p className="text-gray-600">Renseignez les informations du nouveau puits à forer</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">Création d'un Nouveau Projet</h1>
+              <p className="text-gray-600">Renseignez les informations du nouveau projet pétrolier</p>
             </div>
           </div>
 
@@ -299,12 +468,12 @@ export default function CreateWellPage() {
                   <CardContent className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label htmlFor="well-name">Nom du puits *</Label>
-                        <Input id="well-name" name="well-name" placeholder="ex: HMD-45" required />
+                        <Label htmlFor="well-name">Nom du projet *</Label>
+                        <Input id="well-name" name="well-name" placeholder="ex: Hassi Messaoud 45" required />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="well-type">Type de puits *</Label>
+                        <Label htmlFor="well-type">Type de projet *</Label>
                         <Select
                           name="well-type"
                           value={formState.wellType}
@@ -396,7 +565,7 @@ export default function CreateWellPage() {
                       <Textarea
                         id="description"
                         name="description"
-                        placeholder="Description du puits et de ses objectifs"
+                        placeholder="Description du projet et de ses objectifs"
                         className="h-24"
                       />
                     </div>
@@ -417,7 +586,7 @@ export default function CreateWellPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="well-trajectory">Trajectoire du puits *</Label>
+                        <Label htmlFor="well-trajectory">Trajectoire du forage *</Label>
                         <RadioGroup
                           defaultValue="vertical"
                           value={formState.trajectory}
@@ -861,7 +1030,7 @@ export default function CreateWellPage() {
                 ) : (
                   <>
                     <SaveIcon className="mr-2 h-4 w-4" />
-                    Créer le puits
+                    Créer le projet
                   </>
                 )}
               </Button>

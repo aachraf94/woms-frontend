@@ -23,7 +23,7 @@ import {
   LineChart,
   Line,
 } from "recharts"
-import { ArrowUpIcon, ArrowDownIcon, ClockIcon, CheckCircleIcon, AlertTriangleIcon } from "lucide-react"
+import { Clock, CheckCircle } from "lucide-react"
 
 // Données simulées pour les graphiques
 const efficaciteData = [
@@ -44,12 +44,50 @@ const forageData = [
   { mois: "Juil", reussite: 91, echec: 9 },
 ]
 
-const coutData = [
-  { name: "Équipement", value: 42 },
-  { name: "Personnel", value: 28 },
-  { name: "Services", value: 15 },
-  { name: "Logistique", value: 10 },
-  { name: "Autres", value: 5 },
+// Données pour les coûts par catégorie d'opération
+const coutsCategoriesData = [
+  { name: "Forage", value: 35 },
+  { name: "Complétion", value: 20 },
+  { name: "Maintenance", value: 18 },
+  { name: "Tests & Diagraphie", value: 15 },
+  { name: "Logistique", value: 12 },
+]
+
+// Données pour les coûts par phase de forage
+const coutsPhaseForageData = [
+  { name: 'Phase 17½"', value: 28, budget: 30, ecart: -2 },
+  { name: 'Phase 12¼"', value: 35, budget: 32, ecart: 3 },
+  { name: 'Phase 8½"', value: 25, budget: 26, ecart: -1 },
+  { name: 'Phase 6"', value: 12, budget: 12, ecart: 0 },
+]
+
+// Données pour les coûts par mètre foré
+const coutParMetreData = [
+  { puits: "HMD-42", phase17: 0.85, phase12: 0.92, phase8: 1.05, phase6: 1.25 },
+  { puits: "BRK-18", phase17: 0.82, phase12: 0.88, phase8: 1.02, phase6: 1.2 },
+  { puits: "ILZ-05", phase17: 0.9, phase12: 0.95, phase8: 1.1, phase6: 1.3 },
+  { puits: "HRM-23", phase17: 0.88, phase12: 0.94, phase8: 1.08, phase6: 1.28 },
+  { puits: "RND-11", phase17: 0.86, phase12: 0.93, phase8: 1.06, phase6: 1.26 },
+]
+
+// Données pour l'évolution des coûts de forage dans le temps
+const evolutionCoutsForageData = [
+  { mois: "Jan", cout: 32.5 },
+  { mois: "Fév", cout: 33.2 },
+  { mois: "Mar", cout: 31.8 },
+  { mois: "Avr", cout: 32.0 },
+  { mois: "Mai", cout: 30.5 },
+  { mois: "Juin", cout: 29.8 },
+  { mois: "Juil", cout: 28.5 },
+]
+
+// Données pour les indicateurs de performance de forage
+const performanceForageData = [
+  { indicateur: "Vitesse moyenne (m/h)", valeur: 12.5, objectif: 12.0, ecart: "+0.5" },
+  { indicateur: "Temps non-productif (%)", valeur: 15.2, objectif: 12.0, ecart: "+3.2" },
+  { indicateur: "Coût par mètre (k DA/m)", valeur: 95.3, objectif: 100.0, ecart: "-4.7" },
+  { indicateur: "Consommation de boue (m³/m)", valeur: 0.28, objectif: 0.3, ecart: "-0.02" },
+  { indicateur: "Durée moyenne par puits (jours)", valeur: 18.5, objectif: 20.0, ecart: "-1.5" },
 ]
 
 const performanceEquipeData = [
@@ -60,41 +98,61 @@ const performanceEquipeData = [
   { name: "Équipe E", performance: 87, fill: "#8884d8" },
 ]
 
-const delaisData = [
-  { mois: "Jan", planifie: 45, reel: 48, retard: 3 },
-  { mois: "Fév", planifie: 42, reel: 44, retard: 2 },
-  { mois: "Mar", planifie: 38, reel: 37, retard: -1 },
-  { mois: "Avr", planifie: 40, reel: 43, retard: 3 },
-  { mois: "Mai", planifie: 44, reel: 42, retard: -2 },
-  { mois: "Juin", planifie: 41, reel: 45, retard: 4 },
-  { mois: "Juil", planifie: 39, reel: 38, retard: -1 },
+// Données pour les délais planifiés vs réels
+const delaisProjetsData = [
+  { projet: "HMD-42", planifie: 45, reel: 48, ecart: 3 },
+  { projet: "BRK-18", planifie: 38, reel: 35, ecart: -3 },
+  { projet: "ILZ-05", planifie: 42, reel: 46, ecart: 4 },
+  { projet: "HRM-23", planifie: 40, reel: 39, ecart: -1 },
+  { projet: "RND-11", planifie: 36, reel: 42, ecart: 6 },
 ]
 
-const projetsDelaisData = [
-  { nom: "HMD-42", avancement: 85, retard: -2, statut: "Avance" },
-  { nom: "RKZ-17", avancement: 65, retard: 3, statut: "Retard" },
-  { nom: "GLTZ-08", avancement: 42, retard: 5, statut: "Retard" },
-  { nom: "BRKN-11", avancement: 78, retard: 0, statut: "Dans les temps" },
-  { nom: "ILZ-05", avancement: 92, retard: -1, statut: "Avance" },
+// Données pour les causes de retard
+const causesRetardData = [
+  { name: "Problèmes techniques", value: 35 },
+  { name: "Conditions météo", value: 20 },
+  { name: "Logistique", value: 18 },
+  { name: "Attente d'approbation", value: 15 },
+  { name: "Autres", value: 12 },
 ]
 
-// Nouvelles données pour les indicateurs de délais
-const completionRateData = [
-  { mois: "Jan", taux: 78 },
-  { mois: "Fév", taux: 82 },
-  { mois: "Mar", taux: 85 },
-  { mois: "Avr", taux: 80 },
-  { mois: "Mai", taux: 88 },
-  { mois: "Juin", taux: 92 },
-  { mois: "Juil", taux: 90 },
+// Données pour le respect des délais par équipe
+const respectDelaisEquipeData = [
+  { equipe: "Équipe A", respecte: 85, retard: 15 },
+  { equipe: "Équipe B", respecte: 78, retard: 22 },
+  { equipe: "Équipe C", respecte: 92, retard: 8 },
+  { equipe: "Équipe D", respecte: 80, retard: 20 },
+  { equipe: "Équipe E", respecte: 75, retard: 25 },
 ]
 
-const projetsEnCoursData = [
-  { nom: "HMD-42", avancement: 85, delaiPrevu: "15/07", statut: "Avance", retard: -2 },
-  { nom: "RKZ-17", avancement: 65, delaiPrevu: "22/07", statut: "Retard", retard: 3 },
-  { nom: "GLTZ-08", avancement: 42, delaiPrevu: "30/07", statut: "Retard", retard: 5 },
-  { nom: "BRKN-11", avancement: 78, delaiPrevu: "18/07", statut: "Dans les temps", retard: 0 },
-  { nom: "ILZ-05", avancement: 92, delaiPrevu: "12/07", statut: "Avance", retard: -1 },
+// Données pour l'évolution des délais dans le temps
+const evolutionDelaisData = [
+  { mois: "Jan", delaiMoyen: 42, objectif: 40 },
+  { mois: "Fév", delaiMoyen: 43, objectif: 40 },
+  { mois: "Mar", delaiMoyen: 41, objectif: 40 },
+  { mois: "Avr", delaiMoyen: 40, objectif: 40 },
+  { mois: "Mai", delaiMoyen: 38, objectif: 40 },
+  { mois: "Juin", delaiMoyen: 37, objectif: 40 },
+  { mois: "Juil", delaiMoyen: 36, objectif: 40 },
+]
+
+// Données pour les indicateurs de performance liés aux délais
+const performanceDelaisData = [
+  { indicateur: "Temps moyen de forage (jours)", valeur: 18.5, objectif: 20.0, ecart: "-1.5" },
+  { indicateur: "Temps d'attente entre phases (heures)", valeur: 24.2, objectif: 20.0, ecart: "+4.2" },
+  { indicateur: "Délai de mobilisation (jours)", valeur: 3.8, objectif: 4.0, ecart: "-0.2" },
+  { indicateur: "Temps de réponse aux incidents (heures)", valeur: 2.5, objectif: 3.0, ecart: "-0.5" },
+  { indicateur: "Taux de respect du planning (%)", valeur: 82.5, objectif: 85.0, ecart: "-2.5" },
+]
+
+// Données pour le suivi des jalons de projet
+const jalonsProjetData = [
+  { jalon: "Préparation du site", planifie: "01/07", reel: "02/07", statut: "Retard", ecart: 1 },
+  { jalon: "Installation du derrick", planifie: "05/07", reel: "04/07", statut: "Avance", ecart: -1 },
+  { jalon: 'Phase 17½"', planifie: "10/07", reel: "12/07", statut: "Retard", ecart: 2 },
+  { jalon: 'Phase 12¼"', planifie: "18/07", reel: "19/07", statut: "Retard", ecart: 1 },
+  { jalon: 'Phase 8½"', planifie: "25/07", reel: "24/07", statut: "Avance", ecart: -1 },
+  { jalon: "Complétion", planifie: "30/07", reel: "02/08", statut: "Retard", ecart: 3 },
 ]
 
 const COLORS = ["#ED8D31", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
@@ -102,46 +160,75 @@ const COLORS = ["#ED8D31", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
 export default function DashboardKpiCharts() {
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="delais" className="w-full">
+      <Tabs defaultValue="couts" className="w-full">
         <TabsList className="mb-4">
+          <TabsTrigger value="couts">Coûts</TabsTrigger>
           <TabsTrigger value="delais">Délais</TabsTrigger>
           <TabsTrigger value="efficacite">Efficacité</TabsTrigger>
           <TabsTrigger value="forage">Forage</TabsTrigger>
-          <TabsTrigger value="couts">Coûts</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="delais">
+        <TabsContent value="couts">
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Taux de projets terminés dans les délais</CardTitle>
-                <CardDescription>Pourcentage mensuel des projets complétés à temps</CardDescription>
+                <CardTitle>Répartition des coûts par catégorie</CardTitle>
+                <CardDescription>Vue d'ensemble des coûts opérationnels (%)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={coutsCategoriesData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {coutsCategoriesData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Coûts par phase de forage</CardTitle>
+                <CardDescription>Répartition des coûts de forage par phase (M DA)</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={{
-                    taux: {
-                      label: "Taux de complétion à temps (%)",
+                    value: {
+                      label: "Coût réel (M DA)",
                       color: "hsl(30, 100%, 56%)",
+                    },
+                    budget: {
+                      label: "Budget (M DA)",
+                      color: "hsl(210, 100%, 56%)",
                     },
                   }}
                   className="h-[300px]"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={completionRateData}>
+                    <BarChart data={coutsPhaseForageData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="mois" />
-                      <YAxis domain={[70, 100]} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="taux"
-                        stroke="var(--color-taux)"
-                        strokeWidth={2}
-                        activeDot={{ r: 8 }}
-                      />
-                    </LineChart>
+                      <Bar dataKey="value" fill="#ED8D31" />
+                      <Bar dataKey="budget" fill="#0088FE" />
+                    </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
@@ -149,76 +236,412 @@ export default function DashboardKpiCharts() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Projets en cours</CardTitle>
-                <CardDescription>Avancement et respect des délais</CardDescription>
+                <CardTitle>Coût par mètre foré</CardTitle>
+                <CardDescription>Comparaison par puits et par phase (M DA/m)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    phase17: {
+                      label: 'Phase 17½"',
+                      color: "hsl(30, 100%, 56%)",
+                    },
+                    phase12: {
+                      label: 'Phase 12¼"',
+                      color: "hsl(210, 100%, 56%)",
+                    },
+                    phase8: {
+                      label: 'Phase 8½"',
+                      color: "hsl(150, 100%, 40%)",
+                    },
+                    phase6: {
+                      label: 'Phase 6"',
+                      color: "hsl(270, 100%, 60%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={coutParMetreData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="puits" />
+                      <YAxis />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar dataKey="phase17" fill="#ED8D31" />
+                      <Bar dataKey="phase12" fill="#0088FE" />
+                      <Bar dataKey="phase8" fill="#00C49F" />
+                      <Bar dataKey="phase6" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Évolution des coûts de forage</CardTitle>
+                <CardDescription>Tendance sur les 7 derniers mois (M DA)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    cout: {
+                      label: "Coût total (M DA)",
+                      color: "hsl(30, 100%, 56%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={evolutionCoutsForageData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="mois" />
+                      <YAxis domain={[25, 35]} />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Line type="monotone" dataKey="cout" stroke="#ED8D31" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Indicateurs de performance de forage</CardTitle>
+                <CardDescription>Comparaison avec les objectifs</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {projetsEnCoursData.map((projet, index) => (
+                  {performanceForageData.map((item, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <div>
-                          <span className="text-sm font-medium">{projet.nom}</span>
-                          <span className="text-xs text-gray-500 ml-2">Échéance: {projet.delaiPrevu}</span>
+                        <span className="text-sm font-medium">{item.indicateur}</span>
+                        <div className="flex items-center text-sm">
+                          <Badge
+                            className={
+                              item.ecart.startsWith("+") && item.indicateur !== "Temps non-productif (%)"
+                                ? "bg-green-100 text-green-800"
+                                : item.ecart.startsWith("-") && item.indicateur !== "Temps non-productif (%)"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : item.ecart.startsWith("+") && item.indicateur === "Temps non-productif (%)"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-green-100 text-green-800"
+                            }
+                          >
+                            {item.valeur}
+                          </Badge>
+                          <span
+                            className={`ml-2 ${
+                              item.ecart.startsWith("+") && item.indicateur !== "Temps non-productif (%)"
+                                ? "text-green-600"
+                                : item.ecart.startsWith("-") && item.indicateur !== "Temps non-productif (%)"
+                                  ? "text-amber-600"
+                                  : item.ecart.startsWith("+") && item.indicateur === "Temps non-productif (%)"
+                                    ? "text-red-600"
+                                    : "text-green-600"
+                            }`}
+                          >
+                            {item.ecart}
+                          </span>
                         </div>
-                        <Badge
-                          className={
-                            projet.statut === "Avance"
-                              ? "bg-green-100 text-green-800"
-                              : projet.statut === "Retard"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-blue-100 text-blue-800"
-                          }
-                        >
-                          {projet.statut === "Avance" ? (
-                            <>
-                              <CheckCircleIcon className="h-3 w-3 mr-1" /> {Math.abs(projet.retard)} j d'avance
-                            </>
-                          ) : projet.statut === "Retard" ? (
-                            <>
-                              <AlertTriangleIcon className="h-3 w-3 mr-1" /> {projet.retard} j de retard
-                            </>
-                          ) : (
-                            <>
-                              <ClockIcon className="h-3 w-3 mr-1" /> Dans les temps
-                            </>
-                          )}
-                        </Badge>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full">
                         <div
-                          className={
-                            projet.statut === "Avance"
-                              ? "h-2 bg-green-600 rounded-full"
-                              : projet.statut === "Retard"
-                                ? "h-2 bg-red-600 rounded-full"
-                                : "h-2 bg-blue-600 rounded-full"
-                          }
-                          style={{ width: `${projet.avancement}%` }}
+                          className={`h-2 rounded-full ${
+                            item.ecart.startsWith("+") && item.indicateur !== "Temps non-productif (%)"
+                              ? "bg-green-600"
+                              : item.ecart.startsWith("-") && item.indicateur !== "Temps non-productif (%)"
+                                ? "bg-amber-500"
+                                : item.ecart.startsWith("+") && item.indicateur === "Temps non-productif (%)"
+                                  ? "bg-red-600"
+                                  : "bg-green-600"
+                          }`}
+                          style={{
+                            width: `${
+                              item.indicateur === "Temps non-productif (%)"
+                                ? (item.objectif / item.valeur) * 100
+                                : (item.valeur / item.objectif) * 100
+                            }%`,
+                          }}
                         ></div>
                       </div>
                       <div className="flex justify-between text-xs text-gray-500">
-                        <span>Avancement: {projet.avancement}%</span>
-                        <span>
-                          {projet.retard === 0
-                            ? "Dans les temps"
-                            : projet.retard > 0
-                              ? `Retard: ${projet.retard} jours`
-                              : `Avance: ${Math.abs(projet.retard)} jours`}
-                        </span>
+                        <span>Objectif: {item.objectif}</span>
+                        <span>Écart: {item.ecart}</span>
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">Délai moyen de réalisation</span>
-                      <Badge className="bg-[#ED8D31] text-white">42.4 jours</Badge>
+        <TabsContent value="delais">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Délais planifiés vs réels</CardTitle>
+                <CardDescription>Comparaison par projet (jours)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    planifie: {
+                      label: "Délai planifié (jours)",
+                      color: "hsl(210, 100%, 56%)",
+                    },
+                    reel: {
+                      label: "Délai réel (jours)",
+                      color: "hsl(30, 100%, 56%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={delaisProjetsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="projet" />
+                      <YAxis />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar dataKey="planifie" fill="#0088FE" />
+                      <Bar dataKey="reel" fill="#ED8D31" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Causes de retard</CardTitle>
+                <CardDescription>Répartition des causes de retard (%)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={causesRetardData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {causesRetardData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Respect des délais par équipe</CardTitle>
+                <CardDescription>Performance des équipes (%)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    respecte: {
+                      label: "Délais respectés (%)",
+                      color: "hsl(150, 100%, 40%)",
+                    },
+                    retard: {
+                      label: "Retards (%)",
+                      color: "hsl(0, 100%, 60%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={respectDelaisEquipeData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="equipe" type="category" width={80} />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar dataKey="respecte" stackId="a" fill="#00C49F" />
+                      <Bar dataKey="retard" stackId="a" fill="#FF5252" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Évolution des délais</CardTitle>
+                <CardDescription>Tendance sur les 7 derniers mois (jours)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    delaiMoyen: {
+                      label: "Délai moyen (jours)",
+                      color: "hsl(30, 100%, 56%)",
+                    },
+                    objectif: {
+                      label: "Objectif (jours)",
+                      color: "hsl(210, 100%, 56%)",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={evolutionDelaisData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="mois" />
+                      <YAxis domain={[30, 45]} />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Line type="monotone" dataKey="delaiMoyen" stroke="#ED8D31" strokeWidth={2} />
+                      <Line type="monotone" dataKey="objectif" stroke="#0088FE" strokeWidth={2} strokeDasharray="5 5" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Suivi des jalons du projet HMD-42</CardTitle>
+                <CardDescription>Comparaison des dates planifiées vs réelles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4">Jalon</th>
+                        <th className="text-center py-3 px-4">Date planifiée</th>
+                        <th className="text-center py-3 px-4">Date réelle</th>
+                        <th className="text-center py-3 px-4">Statut</th>
+                        <th className="text-center py-3 px-4">Écart (jours)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {jalonsProjetData.map((jalon, index) => (
+                        <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
+                          <td className="py-3 px-4">{jalon.jalon}</td>
+                          <td className="text-center py-3 px-4">{jalon.planifie}</td>
+                          <td className="text-center py-3 px-4">{jalon.reel}</td>
+                          <td className="text-center py-3 px-4">
+                            <div className="flex items-center justify-center">
+                              {jalon.statut === "Retard" ? (
+                                <span className="flex items-center text-red-600">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  Retard
+                                </span>
+                              ) : (
+                                <span className="flex items-center text-green-600">
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Avance
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="text-center py-3 px-4">
+                            <span
+                              className={
+                                jalon.ecart > 0 ? "text-red-600" : jalon.ecart < 0 ? "text-green-600" : "text-gray-600"
+                              }
+                            >
+                              {jalon.ecart > 0 ? "+" + jalon.ecart : jalon.ecart}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Indicateurs de performance liés aux délais</CardTitle>
+                <CardDescription>Comparaison avec les objectifs</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {performanceDelaisData.map((item, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{item.indicateur}</span>
+                        <div className="flex items-center text-sm">
+                          <Badge
+                            className={
+                              item.ecart.startsWith("-") && item.indicateur !== "Temps d'attente entre phases (heures)"
+                                ? "bg-green-100 text-green-800"
+                                : item.ecart.startsWith("+") &&
+                                    item.indicateur !== "Temps d'attente entre phases (heures)"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : item.ecart.startsWith("+") &&
+                                      item.indicateur === "Temps d'attente entre phases (heures)"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-green-100 text-green-800"
+                            }
+                          >
+                            {item.valeur}
+                          </Badge>
+                          <span
+                            className={`ml-2 ${
+                              item.ecart.startsWith("-") && item.indicateur !== "Temps d'attente entre phases (heures)"
+                                ? "text-green-600"
+                                : item.ecart.startsWith("+") &&
+                                    item.indicateur !== "Temps d'attente entre phases (heures)"
+                                  ? "text-amber-600"
+                                  : item.ecart.startsWith("+") &&
+                                      item.indicateur === "Temps d'attente entre phases (heures)"
+                                    ? "text-red-600"
+                                    : "text-green-600"
+                            }`}
+                          >
+                            {item.ecart}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full">
+                        <div
+                          className={`h-2 rounded-full ${
+                            item.ecart.startsWith("-") && item.indicateur !== "Temps d'attente entre phases (heures)"
+                              ? "bg-green-600"
+                              : item.ecart.startsWith("+") &&
+                                  item.indicateur !== "Temps d'attente entre phases (heures)"
+                                ? "bg-amber-500"
+                                : item.ecart.startsWith("+") &&
+                                    item.indicateur === "Temps d'attente entre phases (heures)"
+                                  ? "bg-red-600"
+                                  : "bg-green-600"
+                          }`}
+                          style={{
+                            width: `${
+                              item.indicateur === "Temps d'attente entre phases (heures)" ||
+                              item.indicateur === "Délai de mobilisation (jours)" ||
+                              item.indicateur === "Temps de réponse aux incidents (heures)"
+                                ? (item.objectif / item.valeur) * 100
+                                : (item.valeur / item.objectif) * 100
+                            }%`,
+                          }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Objectif: {item.objectif}</span>
+                        <span>Écart: {item.ecart}</span>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      Moyenne des délais réels pour les projets terminés au cours des 6 derniers mois
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -253,8 +676,8 @@ export default function DashboardKpiCharts() {
                       <YAxis domain={[80, 100]} />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Bar dataKey="efficacite" fill="var(--color-efficacite)" />
-                      <Bar dataKey="objectif" fill="var(--color-objectif)" />
+                      <Bar dataKey="efficacite" fill="#ED8D31" />
+                      <Bar dataKey="objectif" fill="#0088FE" />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -357,20 +780,8 @@ export default function DashboardKpiCharts() {
                       <YAxis />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Area
-                        type="monotone"
-                        dataKey="reussite"
-                        stackId="1"
-                        stroke="var(--color-reussite)"
-                        fill="var(--color-reussite)"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="echec"
-                        stackId="1"
-                        stroke="var(--color-echec)"
-                        fill="var(--color-echec)"
-                      />
+                      <Area type="monotone" dataKey="reussite" stackId="1" stroke="#00C49F" fill="#00C49F" />
+                      <Area type="monotone" dataKey="echec" stackId="1" stroke="#FF5252" fill="#FF5252" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -414,111 +825,6 @@ export default function DashboardKpiCharts() {
                       <Tooltip />
                     </RadialBarChart>
                   </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="couts">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition des coûts opérationnels</CardTitle>
-                <CardDescription>Ventilation par catégorie (%)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={coutData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {coutData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Évolution des coûts</CardTitle>
-                <CardDescription>Tendance sur les 6 derniers mois (M DA)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Coût par baril ($/bbl)</span>
-                      <div className="flex items-center text-green-600 text-sm">
-                        <ArrowDownIcon className="h-4 w-4 mr-1" />
-                        <span>-0.5</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "94%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Mois précédent: 8.9</span>
-                      <span>Actuel: 8.4</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Coût de forage (M DA/m)</span>
-                      <div className="flex items-center text-red-600 text-sm">
-                        <ArrowUpIcon className="h-4 w-4 mr-1" />
-                        <span>+0.2</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-red-600 rounded-full" style={{ width: "105%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Mois précédent: 0.45</span>
-                      <span>Actuel: 0.47</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Coûts logistiques (M DA)</span>
-                      <div className="flex items-center text-green-600 text-sm">
-                        <ArrowDownIcon className="h-4 w-4 mr-1" />
-                        <span>-12.5</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full">
-                      <div className="h-2 bg-green-600 rounded-full" style={{ width: "92%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Mois précédent: 162.5</span>
-                      <span>Actuel: 150.0</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">Opportunités d'optimisation</span>
-                      <Badge className="bg-[#ED8D31] text-white">195M DA</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Potentiel d'économies identifié dans les opérations de forage et la logistique
-                    </p>
-                  </div>
                 </div>
               </CardContent>
             </Card>

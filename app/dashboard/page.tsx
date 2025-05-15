@@ -20,7 +20,7 @@ export default function DashboardPage() {
             <p className="text-gray-600">Bienvenue sur le système de gestion des opérations E&P d'Algérie</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3 mb-6">
+          <div className="grid gap-6 md:grid-cols-4 mb-6">
             {[
               {
                 title: "Puits Actifs",
@@ -29,9 +29,15 @@ export default function DashboardPage() {
                 icon: <LayoutDashboardIcon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
               },
               {
-                title: "Projets dans les délais",
-                value: "85%",
-                change: "4 sur 5 projets",
+                title: "Taux de Disponibilité",
+                value: "94%",
+                change: "Équipements opérationnels",
+                icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
+              },
+              {
+                title: "Budget",
+                value: "87.4M DA",
+                change: "98% du prévu",
                 icon: <BarChart3Icon className="h-8 w-8 text-[#ED8D31] opacity-70" />,
               },
               {

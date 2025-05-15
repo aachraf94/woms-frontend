@@ -1,16 +1,21 @@
 export function validateWellData(data: Record<string, any>) {
   const errors: Record<string, string> = {}
 
-  // Validation du nom du puits
+  // Validation du nom du projet
   if (!data.name) {
-    errors.name = "Le nom du puits est requis"
+    errors.name = "Le nom du projet est requis"
   } else if (data.name.length < 3) {
-    errors.name = "Le nom du puits doit contenir au moins 3 caractères"
+    errors.name = "Le nom du projet doit contenir au moins 3 caractères"
   }
 
-  // Validation du type de puits
+  // Validation du type de projet
   if (!data.type) {
-    errors.type = "Le type de puits est requis"
+    errors.type = "Le type de projet est requis"
+  }
+
+  // Validation du bassin
+  if (!data.basin) {
+    errors.basin = "Le bassin est requis"
   }
 
   // Validation des coordonnées
@@ -49,6 +54,18 @@ export function validateWellData(data: Record<string, any>) {
     errors.budget = "Le budget est requis"
   } else if (isNaN(Number.parseFloat(data.budget)) || Number.parseFloat(data.budget) <= 0) {
     errors.budget = "Le budget doit être un nombre positif"
+  }
+
+  // Validation des jours de forage
+  if (!data.drillingDays) {
+    errors.drillingDays = "Le nombre de jours de forage est requis"
+  } else if (isNaN(Number.parseInt(data.drillingDays)) || Number.parseInt(data.drillingDays) <= 0) {
+    errors.drillingDays = "Le nombre de jours de forage doit être un nombre entier positif"
+  }
+
+  // Validation du réservoir principal
+  if (!data.primaryReservoir) {
+    errors.primaryReservoir = "Le réservoir principal est requis"
   }
 
   return {

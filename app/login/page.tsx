@@ -23,7 +23,7 @@ export default function LoginPage() {
           <div className="flex justify-center">
             <img src="/sonatrach-logo-vector.svg" alt="Sonatrach Logo" className="h-16" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Connexion à SonatrachEP</h2>
+          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Connexion à SonatrackEP</h2>
           <p className="mt-2 text-center text-sm text-gray-600">Système de gestion des opérations E&P en Algérie</p>
         </div>
 

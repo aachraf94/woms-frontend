@@ -2,6 +2,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
 
+// Assurez-vous que l'export par défaut est correctement défini
+// Vérifiez que la fonction est bien exportée par défaut
+
 export default function Loading() {
   return (
     <div className="flex min-h-screen flex-col">

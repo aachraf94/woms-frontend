@@ -8,6 +8,7 @@ import {
   LayoutDashboardIcon,
   PiIcon as PipeIcon,
   BarChart3Icon,
+  MapIcon,
   UsersIcon,
   FileTextIcon,
   AlertTriangleIcon,
@@ -41,6 +42,11 @@ export default function DashboardNav() {
       title: "Analyses & Reporting",
       href: "/reports",
       icon: <BarChart3Icon className="h-5 w-5" />,
+    },
+    {
+      title: "Carte interactive",
+      href: "/map",
+      icon: <MapIcon className="h-5 w-5" />,
     },
     {
       title: "Alertes & Incidents",

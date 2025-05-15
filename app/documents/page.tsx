@@ -118,7 +118,7 @@ const templates = [
   { id: 5, name: "Rapport mensuel", category: "Management", downloads: 98 },
 ]
 
-export default function DocumentsPage() {
+export default function Page() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null)
 

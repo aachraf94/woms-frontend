@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { WellService } from "@/lib/services/well-service"
 import { validateWellData } from "@/lib/validation"
+import { generateWellId } from "@/lib/models/well"
 
 export type WellFormData = {
   name: string
@@ -126,22 +127,28 @@ export async function createWell(formData: FormData) {
       },
     }
 
+    // Utiliser l'ID de projet fourni ou en générer un nouveau
+    const projectId = (formData.get("project-id") as string) || generateWellId(wellData.basin!, wellData.field || "")
+
     // Créer le puits via le service
-    const newWell = await WellService.createWell(wellInput)
+    const newWell = await WellService.createWell({
+      ...wellInput,
+      id: projectId,
+    })
 
     // Révalidation du chemin pour mettre à jour les données affichées
     revalidatePath("/wells")
 
     return {
       success: true,
-      message: `Puits ${newWell.id} créé avec succès`,
+      message: `Projet ${newWell.id} créé avec succès`,
       data: newWell,
     }
   } catch (error) {
-    console.error("Erreur lors de la création du puits:", error)
+    console.error("Erreur lors de la création du projet:", error)
     return {
       success: false,
-      message: "Une erreur est survenue lors de la création du puits",
+      message: "Une erreur est survenue lors de la création du projet",
     }
   }
 }

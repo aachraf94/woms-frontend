@@ -39,7 +39,7 @@
     --chart-3: 160 100% 43%;
     --chart-4: 40 100% 50%;
     --chart-5: 270 100% 60%;
-    --chart-6: 16 100% 65%;
+    --chart-6: 330 100% 65%;
   }
 
   .dark {
@@ -70,14 +70,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-
-    /* Couleurs pour les graphiques en mode sombre */
-    --chart-1: 30 100% 56%; /* Orange - #ED8D31 */
-    --chart-2: 210 100% 56%; /* Bleu - #0088FE */
-    --chart-3: 160 100% 43%; /* Vert - #00C49F */
-    --chart-4: 40 100% 50%; /* Jaune - #FFBB28 */
-    --chart-5: 270 100% 60%; /* Violet - #8884d8 */
-    --chart-6: 16 100% 65%; /* Rouge-orange - #FF8042 */
   }
 }
 

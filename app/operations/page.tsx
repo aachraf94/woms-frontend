@@ -1,6 +1,3 @@
-"use client"
-
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,60 +5,11 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
-import {
-  PlusIcon,
-  SearchIcon,
-  CalendarIcon,
-  ClipboardCheckIcon,
-  FileTextIcon,
-  EyeIcon,
-  EditIcon,
-  UploadIcon,
-} from "lucide-react"
+import { PlusIcon, SearchIcon, CalendarIcon, ClipboardCheckIcon, FileTextIcon, EyeIcon, EditIcon } from "lucide-react"
 
 export default function OperationsPage() {
-  const { toast } = useToast()
-  const [isImporting, setIsImporting] = useState(false)
-
-  // Fonction pour gérer l'importation du fichier CSV
-  const handleImportCSV = async () => {
-    setIsImporting(true)
-    try {
-      const response = await fetch(
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2-RnFwWTaxIh60vMHv94lkhU09ktnIus.csv",
-      )
-
-      if (!response.ok) {
-        throw new Error("Erreur lors du téléchargement du fichier CSV")
-      }
-
-      const csvText = await response.text()
-      const lines = csvText.split("\n").filter((line) => line.trim() !== "")
-
-      // Afficher un message de succès
-      toast({
-        title: "Import réussi",
-        description: `${lines.length - 1} opérations importées avec succès.`,
-        variant: "default",
-      })
-
-      // Ici, vous pourriez traiter les données CSV et les afficher dans l'interface
-      // Pour l'instant, nous nous contentons d'afficher un message de succès
-    } catch (error) {
-      console.error("Erreur lors de l'importation:", error)
-      toast({
-        title: "Erreur d'importation",
-        description: "Une erreur est survenue lors de l'importation du fichier CSV.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsImporting(false)
-    }
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
@@ -75,16 +23,10 @@ export default function OperationsPage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-1">Opérations Journalières</h1>
               <p className="text-gray-600">Suivi et gestion des opérations quotidiennes sur les puits</p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="bg-white" onClick={handleImportCSV} disabled={isImporting}>
-                <UploadIcon className="mr-2 h-4 w-4" />
-                {isImporting ? "Importation..." : "Importer CSV"}
-              </Button>
-              <Button className="bg-[#ED8D31] hover:bg-orange-700">
-                <PlusIcon className="mr-2 h-4 w-4" />
-                Nouvelle Opération
-              </Button>
-            </div>
+            <Button className="bg-[#ED8D31] hover:bg-orange-700">
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Nouvelle Opération
+            </Button>
           </div>
 
           <Card className="mb-6">

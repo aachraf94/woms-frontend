@@ -32,7 +32,7 @@ export default function Home() {
               alt="Sonatrach Logo"
               className="h-12 transition-transform duration-300 hover:scale-105"
             />
-            <span className="ml-3 text-xl font-bold">SonatrachEP</span>
+            <span className="ml-3 text-xl font-bold">SonatrackEP</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-gray-700 hover:text-[#F08100] transition-colors">
@@ -221,9 +221,9 @@ export default function Home() {
               />
             </div>
             <div className="md:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">À propos de SonatrachEP</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">À propos de SonatrackEP</h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                SonatrachEP est une solution développée spécifiquement pour répondre aux besoins des opérations
+                SonatrackEP est une solution développée spécifiquement pour répondre aux besoins des opérations
                 d'exploration et de production pétrolière en Algérie. Notre plateforme combine des technologies de
                 pointe avec une interface intuitive pour offrir une expérience utilisateur optimale.
               </p>
@@ -276,7 +276,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 italic">
-                "SonatrachEP a considérablement amélioré notre efficacité opérationnelle. L'interface intuitive et les
+                "SonatrackEP a considérablement amélioré notre efficacité opérationnelle. L'interface intuitive et les
                 données en temps réel nous permettent de prendre des décisions plus rapidement et avec plus de
                 précision."
               </p>
@@ -323,7 +323,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Prêt à optimiser vos opérations E&P?</h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Rejoignez les nombreuses équipes qui font confiance à SonatrachEP pour la gestion de leurs opérations
+            Rejoignez les nombreuses équipes qui font confiance à SonatrackEP pour la gestion de leurs opérations
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/login">
@@ -348,7 +348,7 @@ export default function Home() {
             <div>
               <div className="flex items-center mb-4">
                 <img src="/sonatrach-logo-vector.svg" alt="Sonatrach Logo" className="h-10 invert" />
-                <span className="ml-3 text-xl font-bold">SonatrachEP</span>
+                <span className="ml-3 text-xl font-bold">SonatrackEP</span>
               </div>
               <p className="text-gray-400">
                 Système de gestion des opérations d'exploration et de production pétrolière en Algérie
@@ -418,7 +418,7 @@ export default function Home() {
           </div>
 
           <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-400 mb-4 md:mb-0">© 2025 SonatrachEP. Tous droits réservés.</div>
+            <div className="text-gray-400 mb-4 md:mb-0">© 2025 SonatrackEP. Tous droits réservés.</div>
             <div className="flex space-x-6">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
                 Conditions d'utilisation
