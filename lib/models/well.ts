@@ -1,7 +1,7 @@
 export interface Well {
   id: string
   name: string
-  type: "exploration" | "delineation" | "development"
+  type: string
   basin: string
   bloc?: string
   field?: string
@@ -42,6 +42,15 @@ export interface Well {
   status: "planned" | "in_progress" | "completed" | "suspended" | "abandoned"
   createdAt: string
   updatedAt: string
+  currentPhase?: {
+    diameter: string
+    depth: number
+    plannedDepth: number
+    costStatus: "success" | "warning" | "danger"
+    timeStatus: "success" | "warning" | "danger"
+    costVariance: number
+    timeVariance: number
+  }
 }
 
 export type WellFormInput = Omit<Well, "id" | "status" | "createdAt" | "updatedAt">

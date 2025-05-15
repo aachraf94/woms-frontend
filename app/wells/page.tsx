@@ -8,7 +8,19 @@ import { Badge } from "@/components/ui/badge"
 import { getWells } from "@/app/actions/well-actions"
 import DashboardHeader from "@/components/dashboard-header"
 import DashboardNav from "@/components/dashboard-nav"
-import { PlusIcon, SearchIcon, EyeIcon, EditIcon, CalendarIcon, MapPinIcon, BarChart3Icon } from "lucide-react"
+import {
+  PlusIcon,
+  SearchIcon,
+  EyeIcon,
+  EditIcon,
+  CalendarIcon,
+  MapPinIcon,
+  BarChart3Icon,
+  MapIcon,
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "lucide-react"
 import type { Well } from "@/lib/models/well"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -18,7 +30,7 @@ export default function WellsPage() {
     {
       id: "HMD-42",
       name: "Hassi Messaoud 42",
-      type: "development",
+      type: "Exploration-Wildcat",
       basin: "Hassi Messaoud",
       field: "HMD Central",
       latitude: 31.6738,
@@ -34,11 +46,20 @@ export default function WellsPage() {
       status: "in_progress",
       createdAt: "2025-06-15",
       updatedAt: "2025-07-07",
+      currentPhase: {
+        diameter: '12¼"',
+        depth: 1850,
+        plannedDepth: 2000,
+        costStatus: "warning",
+        timeStatus: "success",
+        costVariance: 8,
+        timeVariance: -5,
+      },
     },
     {
       id: "BRK-23",
       name: "Berkine 23",
-      type: "exploration",
+      type: "Exploration-Délinéation",
       basin: "Berkine",
       field: "Bloc 405a",
       latitude: 29.2456,
@@ -54,11 +75,20 @@ export default function WellsPage() {
       status: "planned",
       createdAt: "2025-05-20",
       updatedAt: "2025-06-30",
+      currentPhase: {
+        diameter: '17½"',
+        depth: 950,
+        plannedDepth: 1200,
+        costStatus: "danger",
+        timeStatus: "danger",
+        costVariance: 15,
+        timeVariance: 12,
+      },
     },
     {
       id: "RHN-15",
       name: "Rhourde Nouss 15",
-      type: "development",
+      type: "Délinéation",
       basin: "Rhourde Nouss",
       field: "RN Nord",
       latitude: 30.1234,
@@ -74,11 +104,20 @@ export default function WellsPage() {
       status: "completed",
       createdAt: "2025-03-01",
       updatedAt: "2025-05-30",
+      currentPhase: {
+        diameter: '8½"',
+        depth: 3100,
+        plannedDepth: 3100,
+        costStatus: "success",
+        timeStatus: "success",
+        costVariance: -3,
+        timeVariance: -2,
+      },
     },
     {
       id: "ILZ-08",
       name: "Illizi 08",
-      type: "exploration",
+      type: "Exploration-Wildcat",
       basin: "Illizi",
       field: "Bloc 232",
       latitude: 28.5678,
@@ -94,11 +133,20 @@ export default function WellsPage() {
       status: "suspended",
       createdAt: "2025-01-15",
       updatedAt: "2025-04-10",
+      currentPhase: {
+        diameter: '12¼"',
+        depth: 2200,
+        plannedDepth: 2500,
+        costStatus: "warning",
+        timeStatus: "danger",
+        costVariance: 7,
+        timeVariance: 18,
+      },
     },
     {
       id: "HMD-39",
       name: "Hassi Messaoud 39",
-      type: "development",
+      type: "Délinéation",
       basin: "Hassi Messaoud",
       field: "HMD Sud",
       latitude: 31.5432,
@@ -114,11 +162,20 @@ export default function WellsPage() {
       status: "completed",
       createdAt: "2025-01-05",
       updatedAt: "2025-03-15",
+      currentPhase: {
+        diameter: '8½"',
+        depth: 3300,
+        plannedDepth: 3300,
+        costStatus: "success",
+        timeStatus: "success",
+        costVariance: -5,
+        timeVariance: -3,
+      },
     },
     {
       id: "AHN-04",
       name: "Ahnet 04",
-      type: "exploration",
+      type: "Exploration-Wildcat",
       basin: "Ahnet",
       field: "Bloc 337a",
       latitude: 27.8765,
@@ -134,11 +191,20 @@ export default function WellsPage() {
       status: "planned",
       createdAt: "2025-06-20",
       updatedAt: "2025-07-01",
+      currentPhase: {
+        diameter: '26"',
+        depth: 0,
+        plannedDepth: 500,
+        costStatus: "success",
+        timeStatus: "success",
+        costVariance: 0,
+        timeVariance: 0,
+      },
     },
     {
       id: "TNR-12",
       name: "Tinrhert 12",
-      type: "delineation",
+      type: "Exploration-Délinéation",
       basin: "Tinrhert",
       field: "Bloc 235",
       latitude: 29.3456,
@@ -154,11 +220,20 @@ export default function WellsPage() {
       status: "abandoned",
       createdAt: "2024-12-01",
       updatedAt: "2025-03-10",
+      currentPhase: {
+        diameter: '17½"',
+        depth: 1500,
+        plannedDepth: 1800,
+        costStatus: "danger",
+        timeStatus: "danger",
+        costVariance: 25,
+        timeVariance: 30,
+      },
     },
   ])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list")
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [basinFilter, setBasinFilter] = useState<string>("all")
@@ -215,18 +290,24 @@ export default function WellsPage() {
     }
   }
 
-  // Obtenir le type formaté pour l'affichage
-  const getTypeDisplay = (type: string) => {
-    switch (type) {
-      case "exploration":
-        return "Exploration"
-      case "delineation":
-        return "Délinéation"
-      case "development":
-        return "Développement"
+  // Obtenir l'icône et la classe pour le statut des coûts et délais
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "success":
+        return { icon: <CheckCircleIcon className="h-5 w-5 text-green-600" />, class: "text-green-600" }
+      case "warning":
+        return { icon: <AlertTriangleIcon className="h-5 w-5 text-amber-600" />, class: "text-amber-600" }
+      case "danger":
+        return { icon: <XCircleIcon className="h-5 w-5 text-red-600" />, class: "text-red-600" }
       default:
-        return type
+        return { icon: <CheckCircleIcon className="h-5 w-5 text-gray-400" />, class: "text-gray-400" }
     }
+  }
+
+  // Formater la variance pour l'affichage
+  const formatVariance = (variance: number) => {
+    const prefix = variance > 0 ? "+" : ""
+    return `${prefix}${variance}%`
   }
 
   return (
@@ -239,15 +320,15 @@ export default function WellsPage() {
         <main className="flex-1 p-6 bg-gray-50">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">Gestion des Projets</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">Gestion des Puits</h1>
               <p className="text-gray-600">
-                Gestion et suivi des projets pétroliers sur l'ensemble du territoire algérien
+                Gestion et suivi des puits de forage sur l'ensemble du territoire algérien
               </p>
             </div>
             <Link href="/wells/create">
               <Button className="bg-[#ED8D31] hover:bg-orange-700">
                 <PlusIcon className="mr-2 h-4 w-4" />
-                Nouveau Projet
+                Nouveau Puits
               </Button>
             </Link>
           </div>
@@ -287,9 +368,9 @@ export default function WellsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous les types</SelectItem>
-                    <SelectItem value="exploration">Exploration</SelectItem>
-                    <SelectItem value="delineation">Délinéation</SelectItem>
-                    <SelectItem value="development">Développement</SelectItem>
+                    <SelectItem value="Exploration-Wildcat">Exploration-Wildcat</SelectItem>
+                    <SelectItem value="Exploration-Délinéation">Exploration-Délinéation</SelectItem>
+                    <SelectItem value="Délinéation">Délinéation</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -314,8 +395,7 @@ export default function WellsPage() {
 
             <div className="flex justify-between items-center mt-4">
               <div className="text-sm text-gray-500">
-                {filteredWells.length} projet{filteredWells.length !== 1 ? "s" : ""} trouvé
-                {filteredWells.length !== 1 ? "s" : ""}
+                {filteredWells.length} puits trouvé{filteredWells.length !== 1 ? "s" : ""}
               </div>
               <div className="flex space-x-2">
                 <Button
@@ -341,27 +421,36 @@ export default function WellsPage() {
                   </div>
                   Grille
                 </Button>
+                <Button
+                  variant={viewMode === "map" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("map")}
+                  className={viewMode === "map" ? "bg-[#ED8D31] hover:bg-orange-700" : ""}
+                >
+                  <MapIcon className="h-4 w-4 mr-1" />
+                  Carte
+                </Button>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border">
             <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold">Liste des projets</h2>
+              <h2 className="text-lg font-semibold">Liste des puits</h2>
             </div>
             <div className="overflow-x-auto">
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Chargement des projets...</p>
+                  <p className="mt-4 text-gray-600">Chargement des puits...</p>
                 </div>
               ) : filteredWells.length === 0 ? (
                 <div className="p-8 text-center">
-                  <p className="text-gray-600">Aucun projet trouvé</p>
+                  <p className="text-gray-600">Aucun puits trouvé</p>
                   <Link href="/wells/create">
                     <Button className="mt-4 bg-[#ED8D31] hover:bg-orange-700">
                       <PlusIcon className="mr-2 h-4 w-4" />
-                      Créer un projet
+                      Créer un puits
                     </Button>
                   </Link>
                 </div>
@@ -373,16 +462,22 @@ export default function WellsPage() {
                         ID
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nom du Projet
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Localisation
+                        Nom du Puits
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Type
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Profondeur
+                        Localisation
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Phase Actuelle
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Coûts
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Délais
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Statut
@@ -395,13 +490,38 @@ export default function WellsPage() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredWells.map((well) => {
                       const status = getStatusDisplay(well.status)
+                      const costStatus = getStatusIcon(well.currentPhase?.costStatus || "")
+                      const timeStatus = getStatusIcon(well.currentPhase?.timeStatus || "")
                       return (
                         <tr key={well.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap font-medium">{well.id}</td>
                           <td className="px-6 py-4 whitespace-nowrap">{well.name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{well.type}</td>
                           <td className="px-6 py-4 whitespace-nowrap">{well.basin}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{getTypeDisplay(well.type)}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{well.targetDepth} m</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex flex-col">
+                              <span className="font-medium">{well.currentPhase?.diameter}</span>
+                              <span className="text-xs text-gray-500">
+                                {well.currentPhase?.depth} / {well.currentPhase?.plannedDepth} m
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {costStatus.icon}
+                              <span className={`ml-2 ${costStatus.class}`}>
+                                {formatVariance(well.currentPhase?.costVariance || 0)}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {timeStatus.icon}
+                              <span className={`ml-2 ${timeStatus.class}`}>
+                                {formatVariance(well.currentPhase?.timeVariance || 0)}
+                              </span>
+                            </div>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge className={status.class}>{status.text}</Badge>
                           </td>
@@ -426,10 +546,12 @@ export default function WellsPage() {
                     })}
                   </tbody>
                 </table>
-              ) : (
+              ) : viewMode === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                   {filteredWells.map((well) => {
                     const status = getStatusDisplay(well.status)
+                    const costStatus = getStatusIcon(well.currentPhase?.costStatus || "")
+                    const timeStatus = getStatusIcon(well.currentPhase?.timeStatus || "")
                     return (
                       <Card key={well.id} className="overflow-hidden hover:shadow-md transition-shadow">
                         <CardContent className="p-0">
@@ -439,7 +561,7 @@ export default function WellsPage() {
                               <Badge className={status.class}>{status.text}</Badge>
                             </div>
                             <p className="text-sm text-gray-500 mb-4">ID: {well.id}</p>
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                               <div className="flex items-center text-sm">
                                 <MapPinIcon className="h-4 w-4 mr-2 text-gray-500" />
                                 <span>{well.basin}</span>
@@ -448,7 +570,7 @@ export default function WellsPage() {
                                 <div className="h-4 w-4 mr-2 flex items-center justify-center">
                                   <div className="h-3 w-3 rounded-full border border-gray-500"></div>
                                 </div>
-                                <span>{getTypeDisplay(well.type)}</span>
+                                <span>{well.type}</span>
                               </div>
                               <div className="flex items-center text-sm">
                                 <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
@@ -456,6 +578,29 @@ export default function WellsPage() {
                                   {new Date(well.startDate).toLocaleDateString()} -{" "}
                                   {new Date(well.endDate).toLocaleDateString()}
                                 </span>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t">
+                                <div className="text-center">
+                                  <div className="text-xs text-gray-500 mb-1">Phase</div>
+                                  <div className="font-medium">{well.currentPhase?.diameter}</div>
+                                  <div className="text-xs">
+                                    {well.currentPhase?.depth} / {well.currentPhase?.plannedDepth} m
+                                  </div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-xs text-gray-500 mb-1">Coûts</div>
+                                  <div className="flex justify-center">{costStatus.icon}</div>
+                                  <div className={`text-xs ${costStatus.class}`}>
+                                    {formatVariance(well.currentPhase?.costVariance || 0)}
+                                  </div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-xs text-gray-500 mb-1">Délais</div>
+                                  <div className="flex justify-center">{timeStatus.icon}</div>
+                                  <div className={`text-xs ${timeStatus.class}`}>
+                                    {formatVariance(well.currentPhase?.timeVariance || 0)}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -477,6 +622,45 @@ export default function WellsPage() {
                       </Card>
                     )
                   })}
+                </div>
+              ) : (
+                <div className="p-4">
+                  <div className="bg-gray-100 rounded-lg p-4 h-[600px] relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <MapIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900">Vue Carte</h3>
+                        <p className="mt-2 text-sm text-gray-500 max-w-md">
+                          La vue carte afficherait les puits sur une carte de l'Algérie, avec des marqueurs indiquant
+                          leur emplacement et leur statut.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Ici, vous pourriez intégrer une vraie carte avec une bibliothèque comme Leaflet ou Mapbox */}
+
+                    <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-md">
+                      <h4 className="font-medium text-sm mb-2">Légende</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                          <span className="text-xs">Terminé</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
+                          <span className="text-xs">En cours</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                          <span className="text-xs">Planifié</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                          <span className="text-xs">Problème</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
